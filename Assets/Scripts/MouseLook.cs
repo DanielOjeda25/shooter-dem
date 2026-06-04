@@ -22,6 +22,9 @@ public class MouseLook : MonoBehaviour
 
     void Update()
     {
+        // Si el juego esta congelado (pausa o game over), no movemos la camara.
+        if (Time.timeScale == 0f) return;
+
         var mouse = Mouse.current;
         if (mouse == null) return;
 
