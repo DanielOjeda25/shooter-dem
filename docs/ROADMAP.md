@@ -26,20 +26,36 @@ Leyenda: ✅ hecho · 🟡 en progreso · ⬜ pendiente
 - [x] Cámara en primera persona (Main Camera hija del Player) — `MouseLook.cs`
 - [x] Input System (el nuevo: `Keyboard.current` / `Mouse.current`)
 
-## Fase 3 — El arma ⬜
-- [ ] Arma (placeholder) en el jugador
-- [ ] Disparo por raycast + efecto de impacto
-- [ ] Munición
+## Fase 3 — El arma ✅
+- [x] Arma (placeholder) en el jugador — cubo alargado, hija de la Main Camera
+- [x] Disparo por raycast + efecto de impacto — `Weapon.cs` + prefab `ImpactMark`
+- [x] Munición — cargador (`magazineSize`) + recarga con R (corrutina `reloadTime`)
 
-## Fase 4 — Los enemigos ⬜
-- [ ] Enemigo (cápsula) + vida
-- [ ] IA con NavMesh (patrulla / persecución / ataque)
-- [ ] Daño mutuo (disparo baja vida del enemigo; el enemigo daña al jugador)
+## Fase 4 — Los enemigos ✅
+- [x] Enemigo (cápsula roja) + vida — `EnemyHealth.cs`
+- [x] IA con NavMesh — `EnemyAI.cs` (persecución + ataque). NavMesh horneado con
+  `NavMeshSurface` en el Plane; Player/Enemy excluidos con `NavMeshModifier`
+  (Remove Object). _Patrulla pendiente (opcional)._
+- [x] Daño mutuo — disparo baja vida del enemigo (`Weapon.damage`); el enemigo
+  golpea al jugador al acercarse (`PlayerHealth.cs`, ataque con cooldown)
 
-## Fase 5 — Las reglas ⬜
-- [ ] HUD (vida, munición)
-- [ ] Spawns de enemigos
-- [ ] Victoria / derrota
+## Fase 5 — Las reglas ✅
+- [x] Mira / crosshair (Canvas + Image circular, `Knob`)
+- [x] HUD (vida, munición) — `HUD.cs` lee `PlayerHealth` y `Weapon`, textos TMP anclados a esquinas
+- [x] Spawns de enemigos — `EnemySpawner.cs` instancia N copias del prefab `Enemy` en círculo
+- [x] Victoria / derrota — `GameManager.cs` (singleton) cuenta enemigos; game over real
+  (`Time.timeScale = 0` + cursor libre + panel `GameOverPanel`/`GameOverText`)
+- [x] Menú de pausa (Esc) — `PausePanel` con botones Reanudar/Reiniciar/Salir; reinicio
+  recarga la escena (`SceneManager.LoadScene`). `MouseLook` y `Weapon` ignoran input con
+  `Time.timeScale == 0` (no mover cámara ni disparar en pausa/game over)
+
+## Fase 5.5 — El escenario ⬜
+> Objetivo del autor: un mapa **bueno**, con niveles o subniveles. El autor modelará
+> dentro de Unity (tiene **ProBuilder**). El agente guía y verifica por MCP.
+- [ ] Greybox del nivel con ProBuilder (paredes, rampas, cobertura, salas)
+- [ ] Marcar geometría como obstáculo + **re-hornear el NavMesh** (los enemigos rodean)
+- [ ] Niveles / subniveles: estructura de escenas o zonas + transiciones (puertas/triggers)
+- [ ] Iluminación y ambiente básico del escenario
 
 ## Fase 6 — Pulido ⬜
 - [ ] Sonidos (disparo, impactos)
@@ -49,6 +65,9 @@ Leyenda: ✅ hecho · 🟡 en progreso · ⬜ pendiente
 ---
 
 ### Hito actual
-**Fases 0, 1 y 2 cerradas** ✅. Mundo base (suelo 50×50 con material + luz + skybox)
-y jugador FPS funcional (moverse con WASD + mirar con ratón). Siguiente: **Fase 3 — El arma**
-(arma placeholder en el jugador + disparo por raycast).
+**Fases 0–5 cerradas** ✅. Juego jugable de principio a fin: mundo + jugador FPS + arma
+(raycast/impacto/munición) + enemigos que se generan (`EnemySpawner`), te persiguen por
+NavMesh y te atacan; HUD de vida/munición, mira, y **victoria/derrota** con game over real
+(`GameManager` congela el juego y muestra panel GANASTE/PERDISTE).
+Siguiente: **Fase 5.5 — El escenario** (mapa con ProBuilder + niveles, lo modela el autor),
+y luego **Fase 6 — Pulido** (sonido, partículas, animación).

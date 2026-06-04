@@ -40,10 +40,26 @@ Ver `docs/ROADMAP.md`. Orden de construcción (de adentro hacia afuera):
 · 6. Pulido (sonido, partículas, animación).
 
 ## Estado actual
-**Fases 0, 1 y 2 cerradas.** Decidido: el shooter es **FPS** (cámara en los ojos).
+**Fases 0–5 cerradas.** Decidido: el shooter es **FPS** (cámara en los ojos).
 Escena `Assets/Scenes/SampleScene.unity`: suelo (Plane 50×50 con `Materials/Ground.mat`),
 Directional Light, Global Volume (URP) y **Player** (cápsula + CharacterController) con la
 Main Camera como hija a la altura de los ojos.
-Scripts en `Assets/Scripts/`: `PlayerMovement.cs` (WASD) y `MouseLook.cs` (ratón), con el
-**Input System nuevo** (`Keyboard.current` / `Mouse.current`).
-Siguiente: **Fase 3 — El arma** (placeholder + disparo por raycast).
+**Arma**: `Player/Main Camera/Weapon` (cubo placeholder) con `Weapon.cs` — disparo por
+raycast desde la cámara, marca de impacto (prefab `Assets/Prefabs/ImpactMark`, orientada con
+`FromToRotation` y pegada al objeto golpeado), munición (cargador + recarga con R vía
+corrutina) y daño al enemigo (`Weapon.damage`).
+**Enemigos**: prefab `Assets/Prefabs/Enemy` (cápsula roja, `Materials/Enemy.mat`) con
+`EnemyHealth.cs`, `NavMeshAgent` y `EnemyAI.cs` (te persigue y te golpea con cooldown; busca
+al Player solo con `FindAnyObjectByType`). `EnemySpawner.cs` los genera en círculo al empezar.
+NavMesh horneado con `NavMeshSurface` en el Plane; Player y Enemy excluidos con
+`NavMeshModifier` (Remove Object). `PlayerHealth.cs` en el Player recibe el daño.
+**UI/Reglas**: Canvas con mira (`Crosshair`), HUD (`HUD.cs` → `HealthText`/`AmmoText`), panel
+de fin (`GameOverPanel`/`GameOverText`) y menú de pausa (`PausePanel` con botones
+Reanudar/Reiniciar/Salir + `PauseTitle`). `GameManager.cs` (singleton) cuenta enemigos, dispara
+victoria/derrota con game over real (`Time.timeScale = 0` + cursor libre + panel), y gestiona
+pausa con Esc y reinicio (`SceneManager.LoadScene`). `MouseLook` y `Weapon` ignoran input cuando
+`Time.timeScale == 0` (no mover cámara ni disparar en pausa/game over).
+Scripts en `Assets/Scripts/`: `PlayerMovement`, `MouseLook`, `Weapon`, `EnemyHealth`, `EnemyAI`,
+`EnemySpawner`, `PlayerHealth`, `HUD`, `GameManager` — todo con el **Input System nuevo**.
+Siguiente: **Fase 5.5 — El escenario** (mapa con ProBuilder + niveles, lo modela el autor),
+luego **Fase 6 — Pulido**.
