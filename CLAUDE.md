@@ -40,7 +40,10 @@ Ver `docs/ROADMAP.md`. Orden de construcción (de adentro hacia afuera):
 · 6. Pulido (sonido, partículas, animación).
 
 ## Estado actual
-**Fase 1 iniciada.** Escena `Assets/Scenes/SampleScene.unity`: cámara, luz
-direccional, Global Volume (URP) y un **Plane** (suelo) recién creado.
-Pendiente inmediato: centrar el Plane en (0,0,0), agrandarlo y trabajar la luz.
-Falta definir: **FPS o TPS** (el autor dijo "personaje con arma" → probablemente TPS).
+**Fases 0, 1 y 2 cerradas.** Decidido: el shooter es **FPS** (cámara en los ojos).
+Escena `Assets/Scenes/SampleScene.unity`: suelo (Plane 50×50 con `Materials/Ground.mat`),
+Directional Light, Global Volume (URP) y **Player** (cápsula + CharacterController) con la
+Main Camera como hija a la altura de los ojos.
+Scripts en `Assets/Scripts/`: `PlayerMovement.cs` (WASD) y `MouseLook.cs` (ratón), con el
+**Input System nuevo** (`Keyboard.current` / `Mouse.current`).
+Siguiente: **Fase 3 — El arma** (placeholder + disparo por raycast).
