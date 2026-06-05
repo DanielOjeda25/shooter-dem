@@ -15,8 +15,8 @@ public class EnemyAI : MonoBehaviour
     public float attackCooldown = 1f;  // segundos entre golpes
 
     private NavMeshAgent agent;
-    private PlayerHealth targetHealth;  // la vida del jugador (para restarsela)
-    private float lastAttackTime;       // cuando golpeo por ultima vez
+    private IDamageable targetDamageable;  // a quien golpeamos (el jugador, vía interfaz)
+    private float lastAttackTime;          // cuando golpeo por ultima vez
 
     void Awake()
     {
@@ -35,9 +35,9 @@ public class EnemyAI : MonoBehaviour
                 target = player.transform;
         }
 
-        // Guardamos su vida para poder restarsela al atacar.
+        // Guardamos su "danable" para poder restarle vida al atacar.
         if (target != null)
-            targetHealth = target.GetComponent<PlayerHealth>();
+            targetDamageable = target.GetComponent<IDamageable>();
     }
 
     void Update()
@@ -53,8 +53,7 @@ public class EnemyAI : MonoBehaviour
         if (distance <= attackRange && Time.time >= lastAttackTime + attackCooldown)
         {
             lastAttackTime = Time.time;
-            if (targetHealth != null)
-                targetHealth.TakeDamage(attackDamage);
+            targetDamageable?.TakeDamage(attackDamage);
         }
     }
 }

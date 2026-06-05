@@ -24,9 +24,24 @@ public class GameManager : MonoBehaviour
 
     void Awake()
     {
-        // Guardamos la referencia global. Awake corre antes que cualquier Start,
-        // asi que cuando los enemigos se registren, Instance ya existe.
+        // Guardamos la referencia global (la usan los botones de UI / utilidades).
         Instance = this;
+    }
+
+    // Nos suscribimos a los eventos de vida. Los enemigos se generan en el Start
+    // del spawner (despues de estos OnEnable), asi que no perdemos ningun nacimiento.
+    void OnEnable()
+    {
+        EnemyHealth.Spawned += HandleEnemySpawned;
+        EnemyHealth.Killed += HandleEnemyKilled;
+        PlayerHealth.PlayerDied += HandlePlayerDied;
+    }
+
+    void OnDisable()
+    {
+        EnemyHealth.Spawned -= HandleEnemySpawned;
+        EnemyHealth.Killed -= HandleEnemyKilled;
+        PlayerHealth.PlayerDied -= HandlePlayerDied;
     }
 
     void Update()
@@ -42,14 +57,14 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    // Cada enemigo se apunta al nacer.
-    public void RegisterEnemy()
+    // ---------- Reacciones a eventos de vida ----------
+
+    void HandleEnemySpawned(EnemyHealth enemy)
     {
         enemiesAlive++;
     }
 
-    // Cada enemigo avisa al morir.
-    public void EnemyKilled()
+    void HandleEnemyKilled(EnemyHealth enemy)
     {
         enemiesAlive--;
         Debug.Log($"Enemigos restantes: {enemiesAlive}");
@@ -58,8 +73,7 @@ public class GameManager : MonoBehaviour
             Win();
     }
 
-    // El jugador avisa al morir.
-    public void PlayerDied()
+    void HandlePlayerDied()
     {
         Lose();
     }

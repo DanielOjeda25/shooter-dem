@@ -1,46 +1,25 @@
+using System;
 using UnityEngine;
 
-// Vida de un enemigo. Va en el GameObject "Enemy".
-// El arma le llama a TakeDamage() cuando el raycast lo golpea.
-public class EnemyHealth : MonoBehaviour
+// Vida del enemigo. Hereda toda la mecanica de Health y solo aporta lo propio:
+// anunciar nacimiento/muerte por eventos ESTATICOS (un "bus" que escucha el
+// GameManager hoy y el sistema de oleadas en v2.0) y destruirse al morir.
+// Ya NO conoce al GameManager: solo emite eventos; quien quiera, que cuente.
+public class EnemyHealth : Health
 {
-    [Header("Vida")]
-    public int maxHealth = 100;
+    public static event Action<EnemyHealth> Spawned; // "ha nacido un enemigo"
+    public static event Action<EnemyHealth> Killed;   // "ha muerto un enemigo"
 
-    private int currentHealth;
-    private bool isDead;
-
-    void Start()
+    protected override void Awake()
     {
-        // Empieza con la vida llena.
-        currentHealth = maxHealth;
-
-        // Nos apuntamos en el GameManager para que lleve la cuenta.
-        if (GameManager.Instance != null)
-            GameManager.Instance.RegisterEnemy();
+        base.Awake();            // inicializa la vida
+        Spawned?.Invoke(this);
     }
 
-    // Metodo PUBLICO: lo llama Weapon cuando un disparo acierta a este enemigo.
-    public void TakeDamage(int amount)
+    protected override void OnDeath()
     {
-        if (isDead) return; // ya muerto: ignora golpes extra
-
-        currentHealth -= amount;
-        Debug.Log($"{name} recibe {amount} de dano. Vida: {currentHealth}/{maxHealth}");
-
-        if (currentHealth <= 0)
-            Die();
-    }
-
-    void Die()
-    {
-        isDead = true;
         Debug.Log($"{name} ha muerto.");
-
-        // Avisamos al arbitro antes de destruirnos.
-        if (GameManager.Instance != null)
-            GameManager.Instance.EnemyKilled();
-
-        Destroy(gameObject); // de momento desaparece; efectos vendran despues
+        Killed?.Invoke(this);
+        Destroy(gameObject);     // de momento desaparece; efectos de muerte vendran luego
     }
 }

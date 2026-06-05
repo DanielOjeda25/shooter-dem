@@ -161,19 +161,19 @@ public class Weapon : MonoBehaviour
             // hit.collider = objeto golpeado, hit.point = punto exacto del impacto
             Debug.Log($"Impacto en: {hit.collider.name} (a {hit.distance:F1} m)");
 
-            // Si lo golpeado tiene el componente EnemyHealth, le aplicamos dano.
-            // GetComponent devuelve null si ese objeto no es un enemigo.
-            EnemyHealth enemy = hit.collider.GetComponent<EnemyHealth>();
-            if (enemy != null)
-                enemy.TakeDamage(damage);
+            // Si lo golpeado se puede danar (implementa IDamageable: enemigos,
+            // futuros destructibles...), le aplicamos dano. No nos importa su tipo.
+            IDamageable damageable = hit.collider.GetComponent<IDamageable>();
+            if (damageable != null)
+                damageable.TakeDamage(damage);
 
             // Linea roja visible en la vista Scene durante 1 segundo (para depurar)
             Debug.DrawLine(origin, hit.point, Color.red, 1f);
 
             // Sonido de impacto en 2D (volumen pleno, se oye siempre, no depende
-            // de la distancia). Si golpeamos a un enemigo (enemy != null) usamos
+            // de la distancia). Si golpeamos algo danable (un enemigo) usamos
             // sonidos de carne; si no, de pared.
-            PlayRandom2D(enemy != null ? fleshImpactClips : concreteImpactClips);
+            PlayRandom2D(damageable != null ? fleshImpactClips : concreteImpactClips);
 
             // Chispas: instanciamos el prefab en el punto del golpe. Como las
             // particulas salen en esfera (todas direcciones), no hace falta
