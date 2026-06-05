@@ -20,7 +20,9 @@ public class EnemyAI : MonoBehaviour, IKnockbackable
     public float repathInterval = 0.2f;
 
     [Header("Knockback")]
-    public float knockbackDuration = 0.15f;  // duracion del empujon + mini-aturdimiento
+    // Corto a proposito: empuje visible pero recupera la persecucion casi al instante.
+    // Si fuera largo, disparar rapido encadenaria el aturdimiento y "congelaria" al enemigo.
+    public float knockbackDuration = 0.08f;  // duracion del empujon + mini-aturdimiento
 
     private NavMeshAgent agent;
     private IDamageable targetDamageable;  // a quien golpeamos (el jugador, vía interfaz)

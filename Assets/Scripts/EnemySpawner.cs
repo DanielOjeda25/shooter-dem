@@ -20,8 +20,12 @@ public class EnemySpawner : MonoBehaviour
     public float navSampleMaxDistance = 4f;
     // Intentos por enemigo para encontrar un punto bueno antes de rendirse.
     public int maxSpawnAttempts = 20;
+    // Evita que el enemigo aparezca dentro de la vista del jugador (feo sin animacion
+    // de aparicion). Si no hay sitio fuera de vista, cae al primer punto valido.
+    public bool spawnOutOfView = true;
 
     private EnemyPool pool;  // recicla enemigos (creado en Awake, sin cablear en editor)
+    private Camera cam;      // camara del jugador (para el chequeo de vista)
 
     void Awake()
     {
@@ -42,6 +46,9 @@ public class EnemySpawner : MonoBehaviour
             ? PlayerHealth.Current.transform.position
             : (Vector3?)null;
 
+        bool hasFallback = false;       // primer punto valido aunque este a la vista
+        Vector3 fallback = Vector3.zero;
+
         for (int attempt = 0; attempt < maxSpawnAttempts; attempt++)
         {
             // Punto al azar dentro del circulo de radio areaRadius.
@@ -58,17 +65,42 @@ public class EnemySpawner : MonoBehaviour
             if (!NavMesh.SamplePosition(candidate, out NavMeshHit hit, navSampleMaxDistance, NavMesh.AllAreas))
                 continue;
 
-            // Punto valido: spawneamos sobre el NavMesh y mantenemos la altura de
-            // la capsula (centro a spawnHeight sobre el suelo encontrado).
+            // Punto valido sobre el NavMesh (con la altura de la capsula).
             Vector3 pos = new Vector3(hit.position.x, hit.position.y + spawnHeight, hit.position.z);
+
+            // #3 Preferimos que NO nazca dentro de la vista del jugador. Si se ve,
+            // lo guardamos como reserva y seguimos buscando uno fuera de camara.
+            if (spawnOutOfView && IsInView(pos))
+            {
+                if (!hasFallback) { fallback = pos; hasFallback = true; }
+                continue;
+            }
+
             pool.Get(pos, Quaternion.identity);   // reutiliza si hay; si no, crea uno
             return;
         }
 
-        // Tras N intentos no hubo sitio valido. No instanciamos uno "roto" fuera del
-        // NavMesh (causaria un agente que no se mueve y colgaria la oleada). Avisamos.
+        // No hubo sitio fuera de vista: mejor uno a la vista que ninguno.
+        if (hasFallback)
+        {
+            pool.Get(fallback, Quaternion.identity);
+            return;
+        }
+
+        // Ni siquiera un punto valido sobre el NavMesh. No instanciamos uno "roto"
+        // (agente que no se mueve -> colgaria la oleada). Avisamos.
         Debug.LogWarning(
             $"EnemySpawner: no encontre un punto valido en {maxSpawnAttempts} intentos " +
             $"(radio {areaRadius}, NavMesh? distancia minima {minDistanceFromPlayer}). Enemigo omitido.");
+    }
+
+    // True si el punto cae dentro del frustum de la camara (lo veria el jugador).
+    bool IsInView(Vector3 worldPos)
+    {
+        if (cam == null) cam = Camera.main;
+        if (cam == null) return false;   // sin camara, no filtramos por vista
+
+        Vector3 vp = cam.WorldToViewportPoint(worldPos);
+        return vp.z > 0f && vp.x >= 0f && vp.x <= 1f && vp.y >= 0f && vp.y <= 1f;
     }
 }
