@@ -11,8 +11,13 @@ public class Weapon : MonoBehaviour
 {
     [Header("Disparo")]
     public float range = 100f;        // alcance del rayo en metros
-    public int damage = 25;           // dano por disparo
     public Camera fpsCamera;          // desde donde sale el tiro (la Main Camera)
+
+    [Header("Dano (con caida por distancia)")]
+    public int damage = 25;           // dano a quemarropa (hasta falloffStart)
+    public int minDamage = 8;         // dano minimo (desde falloffEnd en adelante)
+    public float falloffStart = 15f;  // hasta esta distancia, dano completo
+    public float falloffEnd = 60f;    // desde esta distancia, solo minDamage
 
     [Header("Que se puede golpear")]
     public LayerMask hitMask = ~0;    // ~0 = todas las capas (de momento, todo)
@@ -97,10 +102,11 @@ public class Weapon : MonoBehaviour
         {
             Debug.Log($"Impacto en: {hit.collider.name} (a {hit.distance:F1} m)");
 
-            // Si lo golpeado se puede danar (IDamageable), le aplicamos dano.
+            // Si lo golpeado se puede danar (IDamageable), le aplicamos dano con
+            // caida por distancia: a quemarropa pega 'damage', lejos baja a 'minDamage'.
             IDamageable damageable = hit.collider.GetComponent<IDamageable>();
             if (damageable != null)
-                damageable.TakeDamage(damage);
+                damageable.TakeDamage(DamageForDistance(hit.distance));
 
             Debug.DrawLine(origin, hit.point, Color.red, 1f); // depuracion en Scene
 
@@ -113,6 +119,17 @@ public class Weapon : MonoBehaviour
             Debug.Log("Fallo (no golpeo nada)");
             Debug.DrawRay(origin, direction * range, Color.green, 1f);
         }
+    }
+
+    // Dano segun la distancia al impacto: completo hasta falloffStart, baja
+    // linealmente hasta minDamage en falloffEnd, y se mantiene en minDamage mas alla.
+    int DamageForDistance(float distance)
+    {
+        if (distance <= falloffStart) return damage;
+        if (distance >= falloffEnd) return minDamage;
+
+        float t = Mathf.InverseLerp(falloffStart, falloffEnd, distance);
+        return Mathf.Max(1, Mathf.RoundToInt(Mathf.Lerp(damage, minDamage, t)));
     }
 
     // Corrutina: espera reloadTime sin congelar el frame y rellena el cargador.
