@@ -7411,14 +7411,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0c42f31fe23b05042a4ca85db13a7071, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Weapon
-  range: 100
-  damage: 25
+  data: {fileID: 11400000, guid: b8ed14ceb7a04804c85d00eb80d6349b, type: 2}
   fpsCamera: {fileID: 330585545}
   hitMask:
     serializedVersion: 2
     m_Bits: 4294967039
-  magazineSize: 12
-  reloadTime: 1.5
 --- !u!82 &1482782265
 AudioSource:
   m_ObjectHideFlags: 0
@@ -7531,6 +7528,7 @@ MonoBehaviour:
   muzzleFlash: {fileID: 933630101}
   impactSparks: {fileID: 8990252747512228723, guid: 580a28dcbf75b8c458effb63cf8316bf, type: 3}
   impactMark: {fileID: 6042170179556387630, guid: 546f583b21666e145b5cad94a78e6c6e, type: 3}
+  sparksLifetime: 1
   impactLifetime: 5
 --- !u!114 &1482782267
 MonoBehaviour:

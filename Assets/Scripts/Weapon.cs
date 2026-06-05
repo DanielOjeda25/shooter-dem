@@ -4,27 +4,18 @@ using UnityEngine;
 using UnityEngine.InputSystem;     // Nuevo Input System de Unity 6
 
 // Responsabilidad UNICA: leer el input de disparo/recarga, lanzar el raycast,
-// aplicar dano y gestionar la municion. NO sabe de sonido, particulas ni recoil:
-// emite EVENTOS y los componentes satelite (WeaponAudio, WeaponEffects,
-// WeaponRecoil) reaccionan suscribiendose. Va en el GameObject "Weapon".
+// aplicar dano y gestionar la municion. Los NUMEROS del arma (dano, falloff,
+// cargador...) viven en un WeaponData (ScriptableObject), de modo que un ARSENAL
+// se hace creando "fichas" distintas SIN escribir codigo nuevo. NO sabe de sonido,
+// particulas ni recoil: emite EVENTOS y los componentes satelite reaccionan.
 public class Weapon : MonoBehaviour
 {
-    [Header("Disparo")]
-    public float range = 100f;        // alcance del rayo en metros
+    [Header("Datos del arma")]
+    public WeaponData data;           // ficha con dano/falloff/cargador/etc.
+
+    [Header("Referencias / capas")]
     public Camera fpsCamera;          // desde donde sale el tiro (la Main Camera)
-
-    [Header("Dano (con caida por distancia)")]
-    public int damage = 25;           // dano a quemarropa (hasta falloffStart)
-    public int minDamage = 8;         // dano minimo (desde falloffEnd en adelante)
-    public float falloffStart = 15f;  // hasta esta distancia, dano completo
-    public float falloffEnd = 60f;    // desde esta distancia, solo minDamage
-
-    [Header("Que se puede golpear")]
-    public LayerMask hitMask = ~0;    // ~0 = todas las capas (de momento, todo)
-
-    [Header("Municion")]
-    public int magazineSize = 12;     // balas por cargador
-    public float reloadTime = 1.5f;   // segundos que tarda la recarga
+    public LayerMask hitMask = ~0;    // que capas puede golpear el rayo
 
     private int currentAmmo;          // balas que quedan ahora mismo
     private bool isReloading;         // true mientras esta recargando
@@ -32,19 +23,24 @@ public class Weapon : MonoBehaviour
     // "Ventanitas" de solo-lectura para el HUD.
     public int CurrentAmmo => currentAmmo;
     public bool IsReloading => isReloading;
+    // El HUD lee esto; lo exponemos desde los datos para no tener que cambiar su codigo.
+    public int magazineSize => data != null ? data.magazineSize : 0;
 
     // Eventos para los componentes de efectos (patron observador).
     public event Action Fired;                  // disparo efectivo (gasta bala)
     public event Action DryFired;               // clic sin municion
     public event Action ReloadStarted;          // empieza la recarga
     public event Action<RaycastHit, bool> Hit;  // (info del golpe, golpeoAlgoDanable)
-    public event Action AmmoChanged;            // municion o estado de recarga cambio (para el HUD)
+    public event Action AmmoChanged;            // municion o estado de recarga cambio (HUD)
 
     void Awake()
     {
         // Si no arrastramos la camara en el Inspector, usamos la principal.
         if (fpsCamera == null)
             fpsCamera = Camera.main;
+
+        if (data == null)
+            Debug.LogError("Weapon: falta asignar un WeaponData en 'data'.", this);
     }
 
     void Start()
@@ -58,9 +54,8 @@ public class Weapon : MonoBehaviour
     {
         // Si el juego esta congelado (pausa o game over), no disparamos ni recargamos.
         if (Time.timeScale == 0f) return;
-
-        // Mientras recarga, ignoramos disparo y recarga.
-        if (isReloading) return;
+        // Mientras recarga, o sin datos de arma, ignoramos input.
+        if (isReloading || data == null) return;
 
         var kb = Keyboard.current;
         // Recargar con R (solo si no esta ya lleno).
@@ -98,12 +93,12 @@ public class Weapon : MonoBehaviour
         Vector3 origin = fpsCamera.transform.position;
         Vector3 direction = fpsCamera.transform.forward;
 
-        if (Physics.Raycast(origin, direction, out RaycastHit hit, range, hitMask))
+        if (Physics.Raycast(origin, direction, out RaycastHit hit, data.range, hitMask))
         {
             Debug.Log($"Impacto en: {hit.collider.name} (a {hit.distance:F1} m)");
 
             // Si lo golpeado se puede danar (IDamageable), le aplicamos dano con
-            // caida por distancia: a quemarropa pega 'damage', lejos baja a 'minDamage'.
+            // caida por distancia: a quemarropa pega data.damage, lejos baja a minDamage.
             IDamageable damageable = hit.collider.GetComponent<IDamageable>();
             if (damageable != null)
                 damageable.TakeDamage(DamageForDistance(hit.distance));
@@ -117,7 +112,7 @@ public class Weapon : MonoBehaviour
         else
         {
             Debug.Log("Fallo (no golpeo nada)");
-            Debug.DrawRay(origin, direction * range, Color.green, 1f);
+            Debug.DrawRay(origin, direction * data.range, Color.green, 1f);
         }
     }
 
@@ -125,11 +120,11 @@ public class Weapon : MonoBehaviour
     // linealmente hasta minDamage en falloffEnd, y se mantiene en minDamage mas alla.
     int DamageForDistance(float distance)
     {
-        if (distance <= falloffStart) return damage;
-        if (distance >= falloffEnd) return minDamage;
+        if (distance <= data.falloffStart) return data.damage;
+        if (distance >= data.falloffEnd) return data.minDamage;
 
-        float t = Mathf.InverseLerp(falloffStart, falloffEnd, distance);
-        return Mathf.Max(1, Mathf.RoundToInt(Mathf.Lerp(damage, minDamage, t)));
+        float t = Mathf.InverseLerp(data.falloffStart, data.falloffEnd, distance);
+        return Mathf.Max(1, Mathf.RoundToInt(Mathf.Lerp(data.damage, data.minDamage, t)));
     }
 
     // Corrutina: espera reloadTime sin congelar el frame y rellena el cargador.
@@ -140,7 +135,7 @@ public class Weapon : MonoBehaviour
         ReloadStarted?.Invoke();
         AmmoChanged?.Invoke();   // el HUD muestra "RECARGANDO..."
 
-        yield return new WaitForSeconds(reloadTime);
+        yield return new WaitForSeconds(data.reloadTime);
 
         currentAmmo = magazineSize;
         isReloading = false;
