@@ -13,6 +13,10 @@ public class Weapon : MonoBehaviour
     [Header("Datos del arma")]
     public WeaponData data;           // ficha con dano/falloff/cargador/etc.
 
+    // Si un WeaponManager (arsenal) controla este arma: el manager fija la municion
+    // inicial al equipar, asi que Weapon NO se auto-inicializa en Start.
+    [HideInInspector] public bool externallyManaged;
+
     [Header("Referencias / capas")]
     public Camera fpsCamera;          // desde donde sale el tiro (la Main Camera)
     public LayerMask hitMask = ~0;    // que capas puede golpear el rayo
@@ -45,9 +49,21 @@ public class Weapon : MonoBehaviour
 
     void Start()
     {
+        if (externallyManaged) return;   // el WeaponManager se encargara de equipar
+
         // Empezamos con el cargador lleno.
         currentAmmo = magazineSize;
         AmmoChanged?.Invoke();   // valor inicial para el HUD
+    }
+
+    // Lo llama el WeaponManager al cambiar de arma: pone la ficha y restaura su municion.
+    public void Equip(WeaponData newData, int startAmmo)
+    {
+        StopAllCoroutines();     // corta una recarga en curso si la habia
+        isReloading = false;
+        data = newData;
+        currentAmmo = startAmmo;
+        AmmoChanged?.Invoke();   // refresca el HUD
     }
 
     void Update()

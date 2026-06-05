@@ -7319,6 +7319,7 @@ GameObject:
   - component: {fileID: 1482782268}
   - component: {fileID: 1482782267}
   - component: {fileID: 1482782266}
+  - component: {fileID: 1482782269}
   m_Layer: 0
   m_Name: Weapon
   m_TagString: Untagged
@@ -7412,6 +7413,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Weapon
   data: {fileID: 11400000, guid: b8ed14ceb7a04804c85d00eb80d6349b, type: 2}
+  externallyManaged: 0
   fpsCamera: {fileID: 330585545}
   hitMask:
     serializedVersion: 2
@@ -7572,6 +7574,23 @@ MonoBehaviour:
   kickback: 0.06
   pitch: 0
   returnSpeed: 10
+--- !u!114 &1482782269
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1482782259}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 41cf0fa315a00d8468cd7b7c4d12d9b7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::WeaponManager
+  weapon: {fileID: 1482782264}
+  weapons:
+  - {fileID: 11400000, guid: b8ed14ceb7a04804c85d00eb80d6349b, type: 2}
+  - {fileID: 11400000, guid: 2a7eb50d195209e44a4bdf1393f65f2f, type: 2}
+  - {fileID: 11400000, guid: 006edf1e883aa714f914229e462236a9, type: 2}
 --- !u!1 &1494678972
 GameObject:
   m_ObjectHideFlags: 0
@@ -7945,6 +7964,7 @@ MonoBehaviour:
   minDistanceFromPlayer: 6
   navSampleMaxDistance: 4
   maxSpawnAttempts: 20
+  spawnOutOfView: 1
 --- !u!4 &1902528917
 Transform:
   m_ObjectHideFlags: 0
@@ -7975,7 +7995,12 @@ MonoBehaviour:
   totalWaves: 0
   baseEnemies: 5
   enemiesGrowthPerWave: 3
+  maxAliveAtOnce: 20
+  spawnBatchSize: 5
+  spawnInterval: 0.5
   timeBetweenWaves: 3
+  restReductionPerWave: 0.5
+  minTimeBetweenWaves: 1.5
   firstWaveDelay: 2
   spawner: {fileID: 1902528916}
 --- !u!1 &1933246119
