@@ -32,14 +32,18 @@ public class EnemySpawner : MonoBehaviour
         pool = new EnemyPool(enemyPrefab, transform);
     }
 
-    // Llamado por el WaveSystem: instancia n enemigos repartidos por el area.
-    public void SpawnEnemies(int n)
+    // Llamado por el WaveSystem: intenta generar n enemigos y devuelve cuantos
+    // se crearon de VERDAD (algunos pueden omitirse si no hay sitio valido).
+    public int SpawnEnemies(int n)
     {
+        int spawned = 0;
         for (int i = 0; i < n; i++)
-            SpawnOne();
+            if (SpawnOne()) spawned++;
+        return spawned;
     }
 
-    void SpawnOne()
+    // Devuelve true si consiguio crear un enemigo; false si no hubo sitio valido.
+    bool SpawnOne()
     {
         // Posicion del jugador (O(1) via el localizador) para la distancia minima.
         Vector3? playerPos = PlayerHealth.Current != null
@@ -77,14 +81,14 @@ public class EnemySpawner : MonoBehaviour
             }
 
             pool.Get(pos, Quaternion.identity);   // reutiliza si hay; si no, crea uno
-            return;
+            return true;
         }
 
         // No hubo sitio fuera de vista: mejor uno a la vista que ninguno.
         if (hasFallback)
         {
             pool.Get(fallback, Quaternion.identity);
-            return;
+            return true;
         }
 
         // Ni siquiera un punto valido sobre el NavMesh. No instanciamos uno "roto"
@@ -92,6 +96,7 @@ public class EnemySpawner : MonoBehaviour
         Debug.LogWarning(
             $"EnemySpawner: no encontre un punto valido en {maxSpawnAttempts} intentos " +
             $"(radio {areaRadius}, NavMesh? distancia minima {minDistanceFromPlayer}). Enemigo omitido.");
+        return false;
     }
 
     // True si el punto cae dentro del frustum de la camara (lo veria el jugador).

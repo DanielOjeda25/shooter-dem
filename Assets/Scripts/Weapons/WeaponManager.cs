@@ -12,8 +12,12 @@ public class WeaponManager : MonoBehaviour
     public Weapon weapon;             // el arma fisica (su data se intercambia)
     public WeaponData[] weapons;      // fichas disponibles (slot 1, 2, 3...)
 
+    [Header("Sonido")]
+    public AudioClip switchClip;      // suena al cambiar de arma (global, no por arma)
+
     private int[] ammo;               // municion actual por arma (paralelo a weapons)
     private int index;                // arma equipada ahora
+    private AudioSource audioSource;  // reutilizamos el altavoz del arma
 
     public int CurrentIndex => index;
     public WeaponData CurrentWeapon =>
@@ -39,6 +43,8 @@ public class WeaponManager : MonoBehaviour
         ammo = new int[weapons.Length];
         for (int i = 0; i < weapons.Length; i++)
             ammo[i] = weapons[i] != null ? weapons[i].magazineSize : 0;
+
+        audioSource = weapon.GetComponent<AudioSource>();
 
         index = 0;
         ApplyEquip();
@@ -72,6 +78,10 @@ public class WeaponManager : MonoBehaviour
     public void Equip(int i)
     {
         if (i == index || i < 0 || i >= weapons.Length || weapons[i] == null) return;
+
+        // Sonido de cambio (solo en cambios reales, no en el equip inicial de Start).
+        if (switchClip != null && audioSource != null)
+            audioSource.PlayOneShot(switchClip);
 
         ammo[index] = weapon.CurrentAmmo;   // guardamos la municion del arma que dejamos
         index = i;

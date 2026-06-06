@@ -29,10 +29,13 @@ public class PlayerMovement : MonoBehaviour
     private float standHeight;        // altura "de pie" (la del collider al arrancar)
     private float standCenterY;
 
-    // Estado expuesto para el feel visual.
+    // Estado expuesto para el feel visual y el audio (pasos).
     public bool IsSprinting => isSprinting;
     public bool IsCrouching => isCrouching;
     public bool IsGrounded => controller.isGrounded;
+    // True si nos desplazamos en horizontal (ignora la caida vertical).
+    public bool IsMoving =>
+        new Vector3(controller.velocity.x, 0f, controller.velocity.z).sqrMagnitude > 0.5f;
 
     void Awake()
     {

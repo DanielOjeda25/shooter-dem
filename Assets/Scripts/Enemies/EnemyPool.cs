@@ -37,7 +37,14 @@ public class EnemyPool
 
             // Teleporte oficial del agente a la nueva posicion (re-engancha al NavMesh).
             if (enemy.TryGetComponent(out NavMeshAgent agent) && agent.isActiveAndEnabled)
+            {
                 agent.Warp(pos);
+                if (agent.isOnNavMesh)
+                {
+                    agent.isStopped = false;   // limpia un "stop" heredado (murio durante un knockback)
+                    agent.ResetPath();         // descarta la ruta de su vida anterior
+                }
+            }
         }
         else
         {

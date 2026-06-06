@@ -9,6 +9,7 @@ using UnityEngine;
 public class Projectile : MonoBehaviour
 {
     public float maxLifetime = 5f;     // si no choca con nada, explota igual (failsafe)
+    public AudioClip explosionClip;    // sonido al explotar (lo pone el prefab)
 
     private int damage;
     private int minDamage;
@@ -70,6 +71,11 @@ public class Projectile : MonoBehaviour
                     kb.ApplyKnockback(col.transform.position - transform.position, knockback * (1f - t));
             }
         }
+
+        // Sonido de explosion en el punto (PlayClipAtPoint crea un altavoz temporal
+        // que sobrevive al Destroy de este proyectil).
+        if (explosionClip != null)
+            AudioSource.PlayClipAtPoint(explosionClip, transform.position);
 
         // De momento se destruye; el efecto visual de explosion vendra luego.
         Destroy(gameObject);

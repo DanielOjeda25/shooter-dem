@@ -46,4 +46,12 @@ public class WeaponData : ScriptableObject
     [Header("Municion")]
     public int magazineSize = 12;     // balas por cargador
     public float reloadTime = 1.5f;   // segundos de recarga
+
+    [Header("Sonido (propio de cada arma)")]
+    // Arrays = variantes; se elige una al azar para que no suene repetitivo.
+    public AudioClip[] fireClips;     // disparo
+    public AudioClip[] reloadClips;   // recarga
+    public AudioClip emptyClip;       // clic sin municion
+    // ¿Suelta casquillo al disparar? Pistola/escopeta sí; bazooka/lanzas no.
+    public bool ejectsShell = true;
 }

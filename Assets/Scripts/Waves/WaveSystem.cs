@@ -23,6 +23,7 @@ public class WaveSystem : MonoBehaviour
     public int maxAliveAtOnce = 20;       // tope de enemigos vivos a la vez
     public int spawnBatchSize = 5;        // cuantos intenta meter por tick
     public float spawnInterval = 0.5f;    // segundos entre tandas de spawn
+    public int maxSpawnFailTicks = 5;     // ticks fallando seguidos antes de rendirse (anti-cuelgue)
 
     [Header("Descanso entre oleadas (decrece con la dificultad)")]
     public float timeBetweenWaves = 5f;        // descanso tras la oleada 1
@@ -86,13 +87,28 @@ public class WaveSystem : MonoBehaviour
 
             // Spawn por tandas respetando el tope de vivos: solo metemos lo que cabe
             // bajo el tope; cuando mueren enemigos se abre hueco y entran mas.
+            // Descontamos por lo REALMENTE generado (algunos pueden omitirse por sitio).
+            int failTicks = 0;
             while (remaining > 0)
             {
                 int batch = ToSpawnThisTick(remaining, enemiesAlive);
                 if (batch > 0)
                 {
-                    spawner.SpawnEnemies(batch);
-                    remaining -= batch;
+                    int spawned = spawner.SpawnEnemies(batch);
+                    remaining -= spawned;
+
+                    // Si pedimos spawnear pero no salio ninguno, contamos fallo.
+                    // Tras varios seguidos, abandonamos el resto (evita bucle infinito
+                    // si no hay sitio valido) y seguimos con los ya generados.
+                    if (spawned == 0)
+                    {
+                        if (++failTicks >= maxSpawnFailTicks)
+                        {
+                            Debug.LogWarning($"WaveSystem: no se pudo generar el resto de la oleada ({remaining} omitidos).");
+                            break;
+                        }
+                    }
+                    else failTicks = 0;
                 }
                 yield return new WaitForSeconds(spawnInterval);
             }

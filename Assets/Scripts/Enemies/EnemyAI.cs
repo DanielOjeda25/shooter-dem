@@ -54,7 +54,8 @@ public class EnemyAI : MonoBehaviour, IKnockbackable
 
         // Escalonamos el primer repath para repartir la carga entre enemigos.
         repathTimer = Random.value * repathInterval;
-        knockbackTimer = 0f;   // por si se reutiliza desde el pool
+        knockbackTimer = 0f;            // por si se reutiliza desde el pool
+        knockbackVel = Vector3.zero;    // sin empuje residual de la vida anterior
 
         // Velocidad escalada por la dificultad de la oleada actual.
         if (agent != null) agent.speed = baseSpeed * Difficulty.speedMultiplier;

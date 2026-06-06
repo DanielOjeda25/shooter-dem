@@ -53,8 +53,10 @@ public class WeaponEffects : MonoBehaviour
             StartCoroutine(ReturnAfter(sparksPool, sparks, sparksLifetime));
         }
 
-        // Marca: orientada con la normal y pegada al objeto golpeado (se mueve con el).
-        if (marksPool != null)
+        // Marca/decal SOLO en geometria del mundo (paredes/suelo), no en enemigos:
+        // un enemigo es danable y vuelve al pool, asi que pegarle la marca haria que
+        // reapareciera sobre el al reciclarse. En el mundo la pegamos al objeto golpeado.
+        if (!hitDamageable && marksPool != null)
         {
             Quaternion rot = Quaternion.FromToRotation(Vector3.up, hit.normal);
             GameObject mark = marksPool.Get(hit.point, rot);
