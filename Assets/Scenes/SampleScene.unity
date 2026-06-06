@@ -1248,6 +1248,8 @@ GameObject:
   - component: {fileID: 597900055}
   - component: {fileID: 597900056}
   - component: {fileID: 597900057}
+  - component: {fileID: 597900059}
+  - component: {fileID: 597900058}
   m_Layer: 8
   m_Name: Player
   m_TagString: Untagged
@@ -1426,6 +1428,125 @@ MonoBehaviour:
   sprintWeaponOffset: {x: 0, y: -0.05, z: -0.1}
   sprintWeaponTilt: {x: 20, y: 0, z: -10}
   feelSpeed: 10
+--- !u!114 &597900058
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 597900048}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ffaf538ef43d6ca408d2311b3a815c33, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerFootsteps
+  movement: {fileID: 597900053}
+  footstepClips:
+  - {fileID: 8300000, guid: 2f64c4f50e704fd43a8dc352df18ebfb, type: 3}
+  - {fileID: 8300000, guid: 42aa85436bbc6d144a958acb8cd1f96f, type: 3}
+  - {fileID: 8300000, guid: 5ddc81afdbf647b479907b0d0bcae64e, type: 3}
+  - {fileID: 8300000, guid: 6c40fb90feb85a442a7575d5ea44922f, type: 3}
+  sprintClip: {fileID: 8300000, guid: 9c29781069f6f094f9a3de3eee402039, type: 3}
+  walkInterval: 0.5
+  sprintInterval: 0.35
+  crouchInterval: 0.7
+--- !u!82 &597900059
+AudioSource:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 597900048}
+  m_Enabled: 1
+  serializedVersion: 4
+  OutputAudioMixerGroup: {fileID: 0}
+  m_audioClip: {fileID: 0}
+  m_Resource: {fileID: 0}
+  m_PlayOnAwake: 1
+  m_Volume: 1
+  m_Pitch: 1
+  Loop: 0
+  Mute: 0
+  Spatialize: 0
+  SpatializePostEffects: 0
+  Priority: 128
+  DopplerLevel: 1
+  MinDistance: 1
+  MaxDistance: 500
+  Pan2D: 0
+  rolloffMode: 0
+  BypassEffects: 0
+  BypassListenerEffects: 0
+  BypassReverbZones: 0
+  rolloffCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  panLevelCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  spreadCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  reverbZoneMixCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
 --- !u!1 &762040840
 GameObject:
   m_ObjectHideFlags: 0
@@ -7544,10 +7665,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f3fc73e8c9ec3c94da3dfeb507a3c577, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::WeaponAudio
-  fireClips:
-  - {fileID: 8300000, guid: 2292bd398a553ce449a2cb72fdec6139, type: 3}
-  emptyClip: {fileID: 8300000, guid: d5d8402eb7744404085a9dd7413d14c0, type: 3}
-  reloadClip: {fileID: 8300000, guid: 20c8829b695028b49a1c118614767cea, type: 3}
   concreteImpactClips:
   - {fileID: 8300000, guid: 85b71344edb9cd44596d436a7c25e780, type: 3}
   - {fileID: 8300000, guid: 36232461d0651fb41938a0796383cc8a, type: 3}
@@ -7559,6 +7676,11 @@ MonoBehaviour:
   - {fileID: 8300000, guid: c24c36b16c3712f4aa1684aebdbae587, type: 3}
   - {fileID: 8300000, guid: b7d8ac3521f392a4786043565d859292, type: 3}
   - {fileID: 8300000, guid: 203e8427623d3b94b970d345dffc160b, type: 3}
+  shellClips:
+  - {fileID: 8300000, guid: b3400e8246e3f074684553dc1bcece3d, type: 3}
+  - {fileID: 8300000, guid: 79318ebeacebdc64c911837d7de8a5eb, type: 3}
+  - {fileID: 8300000, guid: ede4796bd2fb151418e2e9dc80665fe3, type: 3}
+  shellDelay: 0.35
 --- !u!114 &1482782268
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7591,6 +7713,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: b8ed14ceb7a04804c85d00eb80d6349b, type: 2}
   - {fileID: 11400000, guid: 2a7eb50d195209e44a4bdf1393f65f2f, type: 2}
   - {fileID: 11400000, guid: 006edf1e883aa714f914229e462236a9, type: 2}
+  switchClip: {fileID: 8300000, guid: eb8a0bf593f69f94db130cd09fcb7479, type: 3}
 --- !u!1 &1494678972
 GameObject:
   m_ObjectHideFlags: 0
@@ -7998,10 +8121,14 @@ MonoBehaviour:
   maxAliveAtOnce: 20
   spawnBatchSize: 5
   spawnInterval: 0.5
+  maxSpawnFailTicks: 5
   timeBetweenWaves: 3
   restReductionPerWave: 0.5
   minTimeBetweenWaves: 1.5
   firstWaveDelay: 2
+  healthGrowthPerWave: 0.15
+  speedGrowthPerWave: 0.05
+  maxSpeedMultiplier: 2
   spawner: {fileID: 1902528916}
 --- !u!1 &1933246119
 GameObject:

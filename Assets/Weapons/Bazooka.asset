@@ -27,3 +27,9 @@ MonoBehaviour:
   explosionRadius: 5
   magazineSize: 1
   reloadTime: 2.5
+  fireClips:
+  - {fileID: 8300000, guid: 2ccbf636c98e0164fa3666036e1c4215, type: 3}
+  reloadClips:
+  - {fileID: 8300000, guid: 20c8829b695028b49a1c118614767cea, type: 3}
+  emptyClip: {fileID: 8300000, guid: d5d8402eb7744404085a9dd7413d14c0, type: 3}
+  ejectsShell: 0

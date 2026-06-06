@@ -27,3 +27,14 @@ MonoBehaviour:
   explosionRadius: 4
   magazineSize: 6
   reloadTime: 2
+  fireClips:
+  - {fileID: 8300000, guid: dcfd6deb72210c0489c54dca7b981051, type: 3}
+  - {fileID: 8300000, guid: 48da1981f9582fc479e1d4c36e5c61dd, type: 3}
+  - {fileID: 8300000, guid: cfc48ccdd8fcb1c4eb8dec8507db5f9c, type: 3}
+  reloadClips:
+  - {fileID: 8300000, guid: df2ec18f443691446b3cdf17f06b92b4, type: 3}
+  - {fileID: 8300000, guid: 87a13e6a44e98174eadd0db9ab192153, type: 3}
+  - {fileID: 8300000, guid: 3803ca757c4bfa148ad60e79f33c4467, type: 3}
+  - {fileID: 8300000, guid: b159f269d89efc04cbd39a231e96cfa8, type: 3}
+  emptyClip: {fileID: 8300000, guid: 532a78e2a0c343f43a5e8ac978e4e4df, type: 3}
+  ejectsShell: 1

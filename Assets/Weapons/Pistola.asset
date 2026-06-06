@@ -19,6 +19,7 @@ MonoBehaviour:
   minDamage: 8
   falloffStart: 15
   falloffEnd: 60
+  knockback: 8
   pellets: 8
   spreadAngle: 6
   projectilePrefab: {fileID: 8397211671970555492, guid: e5f1a21196f0cb84bba027e450d7aed0, type: 3}
@@ -26,3 +27,9 @@ MonoBehaviour:
   explosionRadius: 4
   magazineSize: 12
   reloadTime: 1.5
+  fireClips:
+  - {fileID: 8300000, guid: 2292bd398a553ce449a2cb72fdec6139, type: 3}
+  reloadClips:
+  - {fileID: 8300000, guid: 20c8829b695028b49a1c118614767cea, type: 3}
+  emptyClip: {fileID: 8300000, guid: d5d8402eb7744404085a9dd7413d14c0, type: 3}
+  ejectsShell: 1
