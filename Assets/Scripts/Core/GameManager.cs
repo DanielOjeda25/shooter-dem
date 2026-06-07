@@ -16,8 +16,8 @@ public class GameManager : MonoBehaviour
     public GameObject gameOverPanel;  // panel que se enciende al terminar (empieza apagado)
     public TMP_Text gameOverText;     // texto grande del mensaje
 
-    [Header("Pausa (UI)")]
-    public GameObject pausePanel;     // panel de pausa (empieza apagado)
+    // Evento de pausa: lo escucha el menu de pausa (UITK) para mostrarse/ocultarse.
+    public static event System.Action<bool> PauseChanged;
 
     private bool gameOver;
     private bool isPaused;
@@ -99,8 +99,7 @@ public class GameManager : MonoBehaviour
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
 
-        if (pausePanel != null)
-            pausePanel.SetActive(true);
+        PauseChanged?.Invoke(true);
     }
 
     // Llamado por la tecla Escape y por el boton "Reanudar".
@@ -111,8 +110,7 @@ public class GameManager : MonoBehaviour
         Cursor.lockState = CursorLockMode.Locked;  // re-enganchamos el cursor (FPS)
         Cursor.visible = false;
 
-        if (pausePanel != null)
-            pausePanel.SetActive(false);
+        PauseChanged?.Invoke(false);
     }
 
     // ---------- Botones ----------

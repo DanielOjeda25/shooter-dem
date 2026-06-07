@@ -1,0 +1,45 @@
+/* Menu de pausa estilo Half-Life: lista a la izquierda, texto pequeno, hover que desliza. */
+
+.pause-root {
+    flex-grow: 1;
+    background-color: rgba(8, 9, 12, 0.7);   /* backdrop oscuro translucido */
+    justify-content: center;                 /* centrado vertical */
+    align-items: flex-start;                 /* alineado a la IZQUIERDA */
+    padding-left: 90px;
+    -unity-font-definition: url("/Assets/UI/Fonts/Rajdhani-SemiBold.ttf");
+}
+
+.pause-menu {
+    align-items: flex-start;
+}
+
+.pause-title {
+    font-size: 40px;
+    color: rgb(215, 232, 208);
+    -unity-font-style: bold;
+    margin-bottom: 20px;
+}
+
+/* Boton-texto plano (sin fondo/borde) */
+.menu-item {
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+    color: rgba(215, 232, 208, 0.55);
+    font-size: 20px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-left;
+    padding-top: 6px;
+    padding-bottom: 6px;
+    padding-left: 12px;
+    padding-right: 18px;
+    margin: 0;
+    /* animacion suave de la inversion de color */
+    transition-property: background-color, color;
+    transition-duration: 0.12s;
+}
+
+/* Al pasar el raton: se invierten fondo/texto (barra "seleccionada" estilo HL). */
+.menu-item:hover {
+    background-color: rgb(215, 232, 208);
+    color: rgb(22, 22, 30);
+}
