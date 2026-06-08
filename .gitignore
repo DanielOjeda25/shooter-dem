@@ -105,3 +105,10 @@ InitTestScene*.unity*
 
 # Auto-generated scenes by play mode tests
 /[Aa]ssets/[Ii]nit[Tt]est[Ss]cene*.unity*
+
+# Visual Studio: formato nuevo de solucion (autogenerado, junk)
+*.slnx
+
+# Carpeta de recuperacion de Unity tras un crash (temporal)
+/[Aa]ssets/_[Rr]ecovery/
+/[Aa]ssets/_[Rr]ecovery.meta
