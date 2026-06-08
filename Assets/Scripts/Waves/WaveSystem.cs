@@ -66,7 +66,7 @@ public class WaveSystem : MonoBehaviour
             Debug.LogError("WaveSystem: falta asignar el EnemySpawner.");
             return;
         }
-        Difficulty.Reset();   // empezar sin escalado (clave al reiniciar la escena)
+        Difficulty.ResetWaves();   // reinicia el escalado por oleada (el nivel se mantiene)
         StartCoroutine(RunWaves());
     }
 
@@ -79,10 +79,10 @@ public class WaveSystem : MonoBehaviour
             currentWave++;
             WaveChanged?.Invoke(currentWave);
 
-            // Escalado de dificultad: los enemigos de esta oleada nacen mas duros y
-            // un poco mas rapidos (cada enemigo lo lee al activarse, incluso del pool).
-            Difficulty.healthMultiplier = 1f + (currentWave - 1) * healthGrowthPerWave;
-            Difficulty.speedMultiplier = Mathf.Min(maxSpeedMultiplier, 1f + (currentWave - 1) * speedGrowthPerWave);
+            // Escalado por oleada: enemigos mas duros y rapidos (ENCIMA del nivel de
+            // dificultad). Cada enemigo lo lee al activarse, incluso del pool.
+            Difficulty.waveHealth = 1f + (currentWave - 1) * healthGrowthPerWave;
+            Difficulty.waveSpeed = Mathf.Min(maxSpeedMultiplier, 1f + (currentWave - 1) * speedGrowthPerWave);
 
             int remaining = EnemiesForWave(currentWave);   // cuota total de la oleada
             Debug.Log($"=== OLEADA {currentWave} — {remaining} enemigos (max {maxAliveAtOnce} vivos) ===");
@@ -131,8 +131,9 @@ public class WaveSystem : MonoBehaviour
         }
     }
 
-    // Cuota total de enemigos de una oleada (crece linealmente con la oleada).
-    int EnemiesForWave(int wave) => Mathf.Max(1, baseEnemies + (wave - 1) * enemiesGrowthPerWave);
+    // Cuota total de enemigos de una oleada (crece con la oleada y con la dificultad).
+    int EnemiesForWave(int wave) =>
+        Mathf.Max(1, Mathf.RoundToInt((baseEnemies + (wave - 1) * enemiesGrowthPerWave) * Difficulty.SpawnCount));
 
     // Cuantos meter en este tick: el hueco que queda bajo el tope, limitado por el
     // tamano de tanda y por lo que aun falta por generar. Nunca negativo.

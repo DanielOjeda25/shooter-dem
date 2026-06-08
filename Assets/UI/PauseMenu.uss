@@ -43,3 +43,10 @@
     background-color: rgb(215, 232, 208);
     color: rgb(22, 22, 30);
 }
+
+/* Dificultad activa: texto a plena opacidad + marca verde a la izquierda. */
+.menu-item.selected {
+    color: rgb(215, 232, 208);
+    border-left-width: 3px;
+    border-left-color: rgb(120, 200, 120);
+}

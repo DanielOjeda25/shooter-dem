@@ -31,7 +31,8 @@ public class RangedAttack : EnemyAttack
         var go = PoolManager.Spawn(projectilePrefab, origin, Quaternion.LookRotation(dir));
         if (go == null) return;
         var proj = go.GetComponent<EnemyProjectile>();
-        if (proj != null) proj.Launch(dir * projectileSpeed, damage);
+        if (proj != null)
+            proj.Launch(dir * projectileSpeed, Mathf.Max(1, Mathf.RoundToInt(damage * Difficulty.EnemyDamage)));
     }
 }
 }

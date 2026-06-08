@@ -61,8 +61,8 @@ public class EnemyAI : MonoBehaviour, IKnockbackable
         knockbackTimer = 0f;            // por si se reutiliza desde el pool
         knockbackVel = Vector3.zero;    // sin empuje residual de la vida anterior
 
-        // Velocidad escalada por la dificultad de la oleada actual.
-        if (agent != null) agent.speed = baseSpeed * Difficulty.speedMultiplier;
+        // Velocidad escalada por la dificultad (nivel + oleada).
+        if (agent != null) agent.speed = baseSpeed * Difficulty.EnemySpeed;
 
         // Enemigos a distancia: la rotacion la llevamos nosotros (mirar al jugador), no
         // el agente (que miraria a su destino de movimiento).
@@ -108,7 +108,8 @@ public class EnemyAI : MonoBehaviour, IKnockbackable
         // En rango + sin cooldown -> delegamos el efecto a la estrategia de ataque.
         // sqrMagnitude (sin sqrt) para no pagar una raiz por enemigo cada frame.
         Vector3 toTarget = target.position - transform.position;
-        if (toTarget.sqrMagnitude <= attackRange * attackRange && Time.time >= lastAttackTime + attackCooldown)
+        if (toTarget.sqrMagnitude <= attackRange * attackRange
+            && Time.time >= lastAttackTime + attackCooldown * Difficulty.AttackCooldown)
         {
             lastAttackTime = Time.time;
             attack?.Execute(target);

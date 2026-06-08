@@ -24,6 +24,7 @@ public class GameManager : MonoBehaviour
     {
         // Guardamos la referencia global (la usan los botones de UI / utilidades).
         Instance = this;
+        Difficulty.Load();   // carga el nivel de dificultad guardado (PlayerPrefs)
     }
 
     // Solo nos importa la muerte del jugador (derrota). Los enemigos los cuenta el WaveSystem.

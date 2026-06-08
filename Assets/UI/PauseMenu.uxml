@@ -4,8 +4,16 @@
         <ui:VisualElement name="pause-menu" class="pause-menu">
             <ui:Label text="PAUSA" class="pause-title" />
             <ui:Button name="btn-resume" text="REANUDAR" class="menu-item" />
+            <ui:Button name="btn-options" text="OPCIONES" class="menu-item" />
             <ui:Button name="btn-restart" text="REINICIAR" class="menu-item" />
             <ui:Button name="btn-quit" text="SALIR" class="menu-item" />
+        </ui:VisualElement>
+        <ui:VisualElement name="options-menu" class="pause-menu">
+            <ui:Label text="DIFICULTAD" class="pause-title" />
+            <ui:Button name="btn-diff-easy" text="FACIL" class="menu-item" />
+            <ui:Button name="btn-diff-medium" text="MEDIO" class="menu-item" />
+            <ui:Button name="btn-diff-hard" text="DIFICIL" class="menu-item" />
+            <ui:Button name="btn-options-back" text="VOLVER" class="menu-item" />
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>
