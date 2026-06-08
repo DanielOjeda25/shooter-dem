@@ -27,6 +27,9 @@ public class EnemyAI : MonoBehaviour, IKnockbackable
     // Corto a proposito: empuje visible pero recupera la persecucion casi al instante.
     // Si fuera largo, disparar rapido encadenaria el aturdimiento y "congelaria" al enemigo.
     public float knockbackDuration = 0.08f;  // duracion del empujon + mini-aturdimiento
+    // Resistencia al empuje POR TIPO de enemigo: 1 = normal; <1 pesado/tanque (se mueve
+    // menos); >1 ligero (sale mas disparado). Se multiplica por la fuerza del arma.
+    public float knockbackMultiplier = 1f;
 
     private NavMeshAgent agent;
     private EnemyAttack attack;            // estrategia de ataque (melee, a distancia, kamikaze...)
@@ -73,7 +76,7 @@ public class EnemyAI : MonoBehaviour, IKnockbackable
         direction.y = 0f;                       // empuje horizontal, no hacia arriba
         if (direction.sqrMagnitude < 0.0001f) return;
 
-        knockbackVel = direction.normalized * force;
+        knockbackVel = direction.normalized * force * knockbackMultiplier;  // pesado resiste, ligero vuela
         knockbackTimer = knockbackDuration;
         agent.isStopped = true;                 // deja de perseguir mientras dura
     }

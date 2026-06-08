@@ -193,6 +193,7 @@ MonoBehaviour:
   keepDistance: 0
   repathInterval: 0.2
   knockbackDuration: 0.08
+  knockbackMultiplier: 1.1
 --- !u!114 &5572068402502521645
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -212,6 +213,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 4294967295
   explosionPrefab: {fileID: 9123729595262269539, guid: 9734d7d4776f10d41b0757fbce15df23, type: 3}
+  explosionLifetime: 2
+  explosionShake: 0.5
 --- !u!114 &3443834439097883815
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -193,6 +193,7 @@ MonoBehaviour:
   keepDistance: 0
   repathInterval: 0.2
   knockbackDuration: 0.08
+  knockbackMultiplier: 0.3
 --- !u!114 &8673272156260448773
 MonoBehaviour:
   m_ObjectHideFlags: 0
