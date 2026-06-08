@@ -13,6 +13,7 @@ public class Projectile : MonoBehaviour
     public float maxLifetime = 5f;     // si no choca con nada, explota igual (failsafe)
     public GameObject explosionPrefab; // VFX + sonido reutilizable (Explosion)
     public float explosionLifetime = 2f; // segundos antes de reciclar el VFX de explosion
+    public float explosionShake = 0.6f;  // sacudida de camara (escalada por distancia)
 
     private int damage;
     private int minDamage;
@@ -81,6 +82,8 @@ public class Projectile : MonoBehaviour
         // Efecto de explosion (VFX + sonido) pooleado (fallback a Instantiate si no hay manager).
         if (explosionPrefab != null)
             PoolManager.SpawnTimed(explosionPrefab, transform.position, Quaternion.identity, explosionLifetime);
+
+        CameraShake.AddAt(transform.position, explosionShake);
 
         PoolManager.Return(gameObject);   // vuelve al pool (o se destruye)
     }

@@ -402,6 +402,7 @@ GameObject:
   - component: {fileID: 330585544}
   - component: {fileID: 330585547}
   - component: {fileID: 330585548}
+  - component: {fileID: 330585549}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -542,6 +543,24 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::MouseLook
   sensitivity: 0.1
   playerBody: {fileID: 597900052}
+--- !u!114 &330585549
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 330585543}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f0bd88b887285ea49a9579ba970f4a2f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ShooterDem.CameraShake
+  maxPitch: 2.5
+  maxYaw: 2.5
+  maxRoll: 4
+  frequency: 22
+  decay: 1.8
+  maxDistance: 30
 --- !u!1 &410087039
 GameObject:
   m_ObjectHideFlags: 0
@@ -6366,6 +6385,7 @@ MonoBehaviour:
   muzzlePoint: {fileID: 933630099}
   muzzleLifetime: 0.5
   muzzleSmokeLifetime: 0.8
+  fireShake: 0.15
   worldImpact: {fileID: 1919248165561455267, guid: 56b487179e2e3524eaf3454e857c138c, type: 3}
   fleshImpact: {fileID: 8417165741215866614, guid: cc1233ea9dbd88e49a000c3698ad422a, type: 3}
   impactMark: {fileID: 0}

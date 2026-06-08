@@ -20,6 +20,7 @@ public class WeaponEffects : MonoBehaviour
     public Transform muzzlePoint;          // punta del arma (donde nacen)
     public float muzzleLifetime = 0.5f;
     public float muzzleSmokeLifetime = 1f;
+    public float fireShake = 0.15f;        // sacudida de camara al disparar (0 = nada)
 
     [Header("Impacto")]
     public GameObject worldImpact;         // pared/suelo
@@ -53,6 +54,7 @@ public class WeaponEffects : MonoBehaviour
 
     void HandleFired()
     {
+        CameraShake.Add(fireShake);   // juice: leve sacudida al disparar
         if (muzzlePoint == null) return;
         // Fogonazo y humo nacen en la punta, en world space (no parentados, para que la
         // escala del arma no altere el tamano que fijaste en el prefab).

@@ -20,6 +20,7 @@ public class KamikazeAttack : EnemyAttack
     public LayerMask hitMask = ~0;
     public GameObject explosionPrefab;   // VFX + sonido reutilizable (Explosion)
     public float explosionLifetime = 2f; // segundos antes de reciclar el VFX
+    public float explosionShake = 0.5f;  // sacudida de camara (escalada por distancia)
 
     private EnemyHealth self;
     private bool hasExploded;
@@ -78,6 +79,8 @@ public class KamikazeAttack : EnemyAttack
 
         if (explosionPrefab != null)
             PoolManager.SpawnTimed(explosionPrefab, transform.position, Quaternion.identity, explosionLifetime);
+
+        CameraShake.AddAt(transform.position, explosionShake);
     }
 }
 }
