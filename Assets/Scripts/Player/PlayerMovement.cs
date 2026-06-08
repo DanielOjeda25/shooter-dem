@@ -18,6 +18,8 @@ public class PlayerMovement : MonoBehaviour
     [Header("Salto / gravedad")]
     public float jumpHeight = 1.2f;   // metros que sube el salto
     public float gravity = -9.81f;    // negativa = tira hacia abajo
+    public float coyoteTime = 0.12f;  // margen para saltar tras salir de un borde
+    public float jumpBuffer = 0.12f;  // margen para registrar el salto justo antes de aterrizar
 
     [Header("Agacharse")]
     public float crouchHeight = 1.3f;          // altura del collider agachado
@@ -30,6 +32,12 @@ public class PlayerMovement : MonoBehaviour
 
     private float standHeight;        // altura "de pie" (la del collider al arrancar)
     private float standCenterY;
+    private float coyoteTimer;        // cuenta atras del coyote time
+    private float jumpBufferTimer;    // cuenta atras del jump buffer
+    private bool wasGrounded;         // para detectar el frame de aterrizaje
+
+    // Se dispara al aterrizar; el float es la velocidad de caida (para el dip de camara).
+    public event System.Action<float> Landed;
 
     // Estado expuesto para el feel visual y el audio (pasos).
     public bool IsSprinting => isSprinting;
@@ -74,12 +82,31 @@ public class PlayerMovement : MonoBehaviour
 
         float speed = isCrouching ? crouchSpeed : (isSprinting ? sprintSpeed : walkSpeed);
 
-        // --- Salto / gravedad ---
-        if (controller.isGrounded && verticalVelocity < 0f)
+        // --- Salto / gravedad (con coyote time + jump buffer) ---
+        bool grounded = controller.isGrounded;
+
+        // Aterrizaje: al pasar de aire a suelo avisamos con la velocidad de caida
+        // (para el dip de camara). ANTES de resetear verticalVelocity.
+        if (grounded && !wasGrounded && -verticalVelocity > 0.1f)
+            Landed?.Invoke(-verticalVelocity);
+        wasGrounded = grounded;
+
+        // Coyote: en suelo se recarga; en el aire se gasta (deja saltar un pelin tarde).
+        coyoteTimer = grounded ? coyoteTime : coyoteTimer - Time.deltaTime;
+        // Buffer: al pulsar salto se abre la ventana; si no, se cierra (deja pulsar un pelin pronto).
+        if (kb != null && kb.spaceKey.wasPressedThisFrame) jumpBufferTimer = jumpBuffer;
+        else jumpBufferTimer -= Time.deltaTime;
+
+        if (grounded && verticalVelocity < 0f)
             verticalVelocity = -2f; // pequeno, para mantener pegado al suelo
 
-        if (kb != null && kb.spaceKey.wasPressedThisFrame && controller.isGrounded && !isCrouching)
+        // Salta si hay salto en cola Y aun queda coyote, y no estamos agachados.
+        if (jumpBufferTimer > 0f && coyoteTimer > 0f && !isCrouching)
+        {
             verticalVelocity = Mathf.Sqrt(jumpHeight * -2f * gravity); // v = sqrt(2*g*h)
+            jumpBufferTimer = 0f;
+            coyoteTimer = 0f;   // consumido (no doble salto)
+        }
 
         verticalVelocity += gravity * Time.deltaTime;
 

@@ -27,11 +27,34 @@ public class MovementFeel : MonoBehaviour
     [Header("Suavizado")]
     public float feelSpeed = 10f;
 
+    [Header("Head-bob (andar/correr)")]
+    public float walkBobSpeed = 9f;
+    public float sprintBobSpeed = 13f;
+    public float bobAmpY = 0.045f;   // vaiven vertical del ojo
+    public float bobAmpX = 0.03f;    // balanceo lateral
+
+    [Header("Aterrizaje")]
+    public float landingDipScale = 0.04f;  // hundimiento por unidad de velocidad de caida
+    public float maxLandingDip = 0.18f;    // tope del hundimiento
+
     private Vector3 holderRestPos;
     private Quaternion holderRestRot;
+    private float eyeBase, baseX, baseZ;   // base de la camara (sin bob/dip)
+    private float bobTimer, bobBlend, dip; // estado del head-bob y del dip de aterrizaje
+
+    void OnEnable()  { if (movement != null) movement.Landed += OnLanded; }
+    void OnDisable() { if (movement != null) movement.Landed -= OnLanded; }
 
     void Start()
     {
+        if (cameraTransform != null)
+        {
+            baseX = cameraTransform.localPosition.x;
+            baseZ = cameraTransform.localPosition.z;
+            eyeBase = cameraTransform.localPosition.y;
+        }
+        else eyeBase = standEyeHeight;
+
         if (weaponHolder != null)
         {
             holderRestPos = weaponHolder.localPosition;
@@ -39,19 +62,35 @@ public class MovementFeel : MonoBehaviour
         }
     }
 
+    // Hundimiento de camara al aterrizar, escalado por la velocidad de caida (con tope).
+    void OnLanded(float impactSpeed)
+    {
+        dip = -Mathf.Min(maxLandingDip, impactSpeed * landingDipScale);
+    }
+
     void LateUpdate()
     {
         if (movement == null) return;
         float t = feelSpeed * Time.deltaTime;
 
-        // --- Camara: altura del ojo segun agachado + hundimiento por sprint ---
+        // --- Camara: ojo (agachado/sprint) + head-bob al andar + dip de aterrizaje ---
         if (cameraTransform != null)
         {
             float targetEye = (movement.IsCrouching ? crouchEyeHeight : standEyeHeight)
                               - (movement.IsSprinting ? sprintDip : 0f);
-            Vector3 p = cameraTransform.localPosition;
-            p.y = Mathf.Lerp(p.y, targetEye, t);
-            cameraTransform.localPosition = p;
+            eyeBase = Mathf.Lerp(eyeBase, targetEye, t);
+
+            // Head-bob: solo al desplazarse por el suelo; entra/sale suave con bobBlend.
+            bool moving = movement.IsMoving && movement.IsGrounded;
+            bobBlend = Mathf.Lerp(bobBlend, moving ? 1f : 0f, t);
+            if (moving)
+                bobTimer += (movement.IsSprinting ? sprintBobSpeed : walkBobSpeed) * Time.deltaTime;
+            float bobY = Mathf.Sin(bobTimer * 2f) * bobAmpY * bobBlend;  // sube/baja 2x por zancada
+            float bobX = Mathf.Cos(bobTimer) * bobAmpX * bobBlend;       // balanceo lateral 1x
+
+            dip = Mathf.Lerp(dip, 0f, t);   // el dip de aterrizaje vuelve a 0 suave
+
+            cameraTransform.localPosition = new Vector3(baseX + bobX, eyeBase + bobY + dip, baseZ);
         }
 
         // --- Arma: pose de sprint (repliegue) o reposo ---
