@@ -18,9 +18,10 @@ Nota: el **juego compila aunque falte LFS** (los scripts no dependen de Roslyn);
 rompería el tooling de tests por MCP.
 
 ## Qué es esto
-Proyecto de **aprendizaje** de desarrollo de videojuegos: un **shooter 3D** en
-**Unity 6 (URP)**. Meta del autor: personaje con arma, varios enemigos con IA,
-moverse y dispararles.
+**ASHFALL** (nombre del juego; antes `shooter-dem`) — proyecto de **aprendizaje** de desarrollo
+de videojuegos: un **shooter 3D de acción/hordas con gore** en **Unity 6 (URP)**, que evoluciona
+hacia un **mundo sci-fi decadente con atmósfera y narrativa**. **Visión completa: `docs/VISION.md`.**
+Meta original: personaje con arma, varios enemigos con IA, moverse y dispararles.
 
 ## Método de trabajo (IMPORTANTE)
 El autor **está aprendiendo** y quiere **entender**, no que el agente lo haga todo.
