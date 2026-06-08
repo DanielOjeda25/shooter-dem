@@ -52,9 +52,9 @@ Leyenda: ✅ hecho · 🟡 en progreso · ⬜ pendiente
 ## Fase 6 — Pulido ✅
 Orden acordado: **1) partículas → 2) sonidos → 3) animaciones** (las partículas no
 dependen de assets externos; los sonidos necesitan clips que aporta el autor).
-- [x] Partículas — **muzzle flash** (`MuzzleFlash`, hijo del arma; `Weapon.muzzleFlash.Play()`)
-  + **chispas en el impacto** (prefab `Assets/Prefabs/ImpactSparks`, instanciado en `hit.point`;
-  Stretched Billboard + Trails para look de chispa). Campos `muzzleFlash`/`impactSparks` en `Weapon.cs`.
+- [x] Partículas — sistema de efectos del arma `WeaponEffects` (con **pooling**): fogonazo,
+  humo, impacto y sangre. _Actualizado en v2.0 a **VFX de packs URP** (Vefects + Gabriel Aguiar);
+  ver abajo._
 - [x] Sonidos — `AudioSource` en `Weapon` (2D). Disparo (`fire1`), sin munición (`empty`),
   recarga (`reload`) vía `PlayOneShot`; impacto en pared (`concrete1..4`) vs enemigo (`flesh1..5`)
   elegido al azar. Clips en `Assets/Audio/`. Disparo semiautomático (1 tiro por clic, sin cadencia tope).
@@ -85,14 +85,16 @@ dependen de assets externos; los sonidos necesitan clips que aporta el autor).
 - **Variedad de enemigos tipo SS**: 🟡 *iniciado* — arquitectura de **estrategia de ataque**
   (`EnemyAttack` abstracto; `MeleeAttack` y `KamikazeAttack`) + **`EnemyData` (SO)** y spawner
   multi-tipo con **sorteo ponderado** (pool por prefab). Hechos: **melee** (rojo) y **kamikaze**
-  (naranja: corre, explota en área y se autodestruye). Faltan: **ranged** (dispara a distancia)
-  y **tanque** (lento, mucha vida); enemigos animados (Blender).
+  (naranja: corre y explota en área). El kamikaze ahora explota **al morir por cualquier causa**
+  (`Health.Died`) → **explosión en cadena** entre kamikazes cercanos. Faltan: **ranged** (dispara
+  a distancia) y **tanque** (lento, mucha vida); enemigos animados (Blender).
 - **Explosiones de área y props destructibles**: ✅ *base hecha* — `Projectile.cs` explota al
   impactar y aplica daño en área con `Physics.OverlapSphere` → `TakeDamage` a todo `IDamageable`
   del radio (con caída por distancia) + **knockback radial**. Usado por el arma en modo
-  `Projectile` (bazooka). Falta: **efecto visual** de explosión (VFX) + **clip real** de sonido
-  (ahora placeholder), y props destructibles (objetos `IDamageable` que al morir se cambian por
-  escombros). Descartado: deformación real del terreno (caro + choca NavMesh).
+  `Projectile` (bazooka) y por el **kamikaze**, con **VFX de explosión** (prefab reutilizable,
+  pack Gabriel Aguiar). Falta: **clip real** de sonido (ahora placeholder) y props destructibles
+  (objetos `IDamageable` que al morir se cambian por escombros). Descartado: deformación real del
+  terreno (caro + choca NavMesh).
 - **Personajes y animaciones realistas (Blender → Unity)**: modelar/riggear/animar en
   Blender y exportar `.fbx` (malla + armature + clips). Dos frentes: **viewmodel de brazos+arma**
   para el FPS, y sobre todo **enemigos animados** (idle/andar/atacar/morir) — los que más se notan.
@@ -120,8 +122,13 @@ enemigos por NavMesh, reglas/HUD/game over) ya hay buena parte de la Visión v2.
 - **Arsenal**: `WeaponManager` + Pistola/Escopeta/Bazooka data-driven; knockback; explosión AoE.
 - **Audio**: por arma, pasos, casquillos, cambio de arma, bazooka.
 
-- **Enemigos**: ✅ kamikaze (2º tipo) + sistema data-driven (`EnemyData` SO) y spawner multi-tipo.
+- **Enemigos**: ✅ kamikaze (2º tipo) con **explosión en cadena** + sistema data-driven
+  (`EnemyData` SO) y spawner multi-tipo.
+- **VFX (realistas, URP)**: ✅ migrados a **packs gratis** (Vefects Free Blood/Free Fire,
+  Gabriel Aguiar Free Quick Effects); `WeaponEffects` con pooling — fogonazo/humo/impacto/sangre
+  y explosión por prefab. Tamaño/color en el prefab, no en código.
+- **Gore**: ✅ **sangre persistente** en el suelo (`BloodDecalManager`: decals con tope para hordas).
 
 **Siguiente (orden sugerido):** 3er/4º **enemigo** (ranged + tanque) → **spawners por zonas** →
-**mapa-arena grande**. Pendientes menores: VFX+clip real de explosión (bazooka y kamikaze),
-props destructibles, enemigos animados (Blender), más armas. **El mapa grande es el gran salto restante.**
+**mapa-arena grande**. Pendientes menores: **clip real** de sonido de explosión, props
+destructibles, enemigos animados (Blender), más armas. **El mapa grande es el gran salto restante.**
