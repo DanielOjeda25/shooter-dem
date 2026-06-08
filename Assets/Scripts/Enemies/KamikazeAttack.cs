@@ -69,6 +69,8 @@ public class KamikazeAttack : EnemyAttack
             float t = Mathf.Clamp01(Vector3.Distance(transform.position, col.transform.position) / radius);
             dmgable.TakeDamage(Mathf.Max(1, Mathf.RoundToInt(damage * (1f - t))));  // puede matar a otro kamikaze -> cadena
 
+            if (dmgable is PlayerHealth ph) ph.RegisterHit(transform.position);   // indicador direccional + shake
+
             if (knockback > 0f)
             {
                 var kb = col.GetComponentInParent<IKnockbackable>();

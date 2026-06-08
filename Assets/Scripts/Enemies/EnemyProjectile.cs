@@ -49,6 +49,10 @@ public class EnemyProjectile : MonoBehaviour
         {
             consumed = true;
             dmgable.TakeDamage(damage);
+
+            var ph = other.GetComponentInParent<PlayerHealth>();
+            if (ph != null) ph.RegisterHit(transform.position);   // indicador direccional + shake
+
             Despawn();
             return;
         }

@@ -16,8 +16,12 @@ public class HudController : MonoBehaviour
     public WaveSystem waveSystem;
     public WeaponManager weaponManager;
 
+    [Header("Feedback de dano")]
+    public float playerHitShake = 0.35f;   // sacudida de camara al recibir dano
+
     private Label healthValue, ammoValue, weaponName, waveValue;
     private CrosshairArcs crosshair;   // arcos del reticle (vida/escudo/cargador/reserva)
+    private Camera cam;                // para calcular la direccion del dano (cacheada)
 
     void OnEnable()
     {
@@ -26,6 +30,7 @@ public class HudController : MonoBehaviour
         if (weapon != null) weapon.Fired += OnFired;
         if (waveSystem != null) waveSystem.WaveChanged += OnWaveChanged;
         if (weaponManager != null) weaponManager.WeaponSwitched += OnWeaponSwitched;
+        if (playerHealth != null) playerHealth.Hit += OnPlayerHit;
     }
 
     void OnDisable()
@@ -35,6 +40,21 @@ public class HudController : MonoBehaviour
         if (weapon != null) weapon.Fired -= OnFired;
         if (waveSystem != null) waveSystem.WaveChanged -= OnWaveChanged;
         if (weaponManager != null) weaponManager.WeaponSwitched -= OnWeaponSwitched;
+        if (playerHealth != null) playerHealth.Hit -= OnPlayerHit;
+    }
+
+    // Al recibir dano: arco rojo apuntando al origen + sacudida de camara.
+    void OnPlayerHit(Vector3 source)
+    {
+        if (cam == null) cam = Camera.main;
+        if (cam != null && crosshair != null)
+        {
+            Vector3 to = source - cam.transform.position; to.y = 0f;
+            Vector3 fwd = cam.transform.forward; fwd.y = 0f;
+            if (to.sqrMagnitude > 0.0001f && fwd.sqrMagnitude > 0.0001f)
+                crosshair.AddDamage(Vector3.SignedAngle(fwd, to, Vector3.up));  // 0=frente, +=derecha
+        }
+        CameraShake.Add(playerHitShake);
     }
 
     void OnFired()

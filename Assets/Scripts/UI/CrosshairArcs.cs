@@ -46,6 +46,25 @@ public class CrosshairArcs : VisualElement
     private float kick;
     private float spin;
 
+    // Indicadores direccionales de dano (estilo CS): arcos rojos alrededor de la mira
+    // que apuntan al origen del golpe y se desvanecen.
+    const int MaxDamage = 6;
+    const float DamageLife = 1.3f;                      // segundos que dura cada indicador
+    readonly float[] dmgAngle = new float[MaxDamage];   // angulo: 0=de frente, +=derecha
+    readonly float[] dmgLife = new float[MaxDamage];    // 1..0 (se desvanece)
+
+    // Lo llama el HUD al recibir dano. angleFromFront: 0=de frente, +90=derecha,
+    // -90=izquierda, +-180=a la espalda.
+    public void AddDamage(float angleFromFront)
+    {
+        int slot = 0; float lowest = float.MaxValue;        // reusa el slot mas gastado
+        for (int i = 0; i < MaxDamage; i++)
+            if (dmgLife[i] < lowest) { lowest = dmgLife[i]; slot = i; }
+        dmgAngle[slot] = angleFromFront;
+        dmgLife[slot] = 1f;
+        MarkDirtyRepaint();
+    }
+
     static readonly Color Track = new Color(0.843f, 0.910f, 0.816f, 0.15f);
     static readonly Color Bone  = new Color(0.843f, 0.910f, 0.816f);
     static readonly Color Warn  = new Color(0.90f, 0.20f, 0.15f);
@@ -80,6 +99,13 @@ public class CrosshairArcs : VisualElement
             changed = true;
         }
 
+        for (int i = 0; i < MaxDamage; i++)
+            if (dmgLife[i] > 0f)
+            {
+                dmgLife[i] = Mathf.Max(0f, dmgLife[i] - 0.016f / DamageLife);
+                changed = true;
+            }
+
         if (changed) MarkDirtyRepaint();
     }
 
@@ -113,6 +139,25 @@ public class CrosshairArcs : VisualElement
         }
 
         DrawReticle(p, c);   // mira central segun el arma (siempre visible)
+        DrawDamage(p, c);    // indicadores direccionales de dano (si los hay)
+    }
+
+    // Arcos rojos que apuntan al origen del dano reciente y se desvanecen.
+    void DrawDamage(Painter2D p, Vector2 c)
+    {
+        const float r = 54f, half = 22f;
+        p.lineWidth = 6f;
+        for (int i = 0; i < MaxDamage; i++)
+        {
+            if (dmgLife[i] <= 0f) continue;
+            // En pantalla Painter2D 0deg=derecha y crece en horario; "de frente"=arriba=270.
+            float screen = 270f + dmgAngle[i];
+            Color col = Warn; col.a = Mathf.Clamp01(dmgLife[i]);
+            p.strokeColor = col;
+            p.BeginPath();
+            p.Arc(c, r, Deg(screen - half), Deg(screen + half));
+            p.Stroke();
+        }
     }
 
     // Circulo casi-completo que gira: indica "recargando, no puedes disparar".
