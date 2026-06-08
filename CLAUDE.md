@@ -2,6 +2,21 @@
 
 > Léeme al empezar cualquier sesión en este proyecto.
 
+## ⚠️ NOTA IMPORTANTE — Git LFS (leer al sincronizar en otra PC)
+Este repo usa **Git LFS** para binarios: imágenes, fuentes, audio y **los DLLs de Roslyn**
+en `Assets/Packages/` (instalados con NuGetForUnity para que el `execute_code` del MCP use
+el backend Roslyn y no el CodeDom, que petaba con un BOM → `Line 1: ﻿`).
+
+**Si algo va mal tras `git pull`** (DLLs/imágenes que aparecen como archivos de texto de ~1 KB,
+o Unity da errores raros al importar `Assets/Packages/`):
+1. `git lfs install`  (una sola vez por PC)
+2. `git lfs pull`     (descarga los binarios reales)
+
+Luego abre el proyecto en Unity (la 1ª vez tarda: reconstruye `Library/` y baja los paquetes
+de git — unity-mcp y NuGetForUnity — desde GitHub, necesita internet).
+Nota: el **juego compila aunque falte LFS** (los scripts no dependen de Roslyn); solo se
+rompería el tooling de tests por MCP.
+
 ## Qué es esto
 Proyecto de **aprendizaje** de desarrollo de videojuegos: un **shooter 3D** en
 **Unity 6 (URP)**. Meta del autor: personaje con arma, varios enemigos con IA,
