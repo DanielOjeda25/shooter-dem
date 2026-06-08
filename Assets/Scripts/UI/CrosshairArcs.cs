@@ -66,6 +66,17 @@ public class CrosshairArcs : VisualElement
         MarkDirtyRepaint();
     }
 
+    // Cargas de dash (estilo Doom): se dibujan como ticks bajo la mira.
+    private float dashCharges;
+    private int dashMax;
+    public void SetDash(float charges, int max)
+    {
+        if (Mathf.Abs(charges - dashCharges) > 0.001f || max != dashMax)
+        {
+            dashCharges = charges; dashMax = max; MarkDirtyRepaint();
+        }
+    }
+
     static readonly Color Track = new Color(0.843f, 0.910f, 0.816f, 0.15f);
     static readonly Color Bone  = new Color(0.843f, 0.910f, 0.816f);
     static readonly Color Warn  = new Color(0.90f, 0.20f, 0.15f);
@@ -141,6 +152,31 @@ public class CrosshairArcs : VisualElement
 
         DrawReticle(p, c);   // mira central segun el arma (siempre visible)
         DrawDamage(p, c);    // indicadores direccionales de dano (si los hay)
+        DrawDash(p, c);      // cargas de dash bajo la mira
+    }
+
+    // Cargas de dash: ticks horizontales bajo la mira (lleno=disponible, parcial=recargando).
+    void DrawDash(Painter2D p, Vector2 c)
+    {
+        if (dashMax <= 0) return;
+        const float w = 9f, gap = 5f, y = 22f;
+        p.lineWidth = 3f;
+        float total = dashMax * w + (dashMax - 1) * gap;
+        float x = c.x - total / 2f;
+        for (int i = 0; i < dashMax; i++)
+        {
+            float cx = x + i * (w + gap);
+            float yy = c.y + y;
+            p.strokeColor = Track;                                 // pista (siempre)
+            Line(p, new Vector2(cx, yy), new Vector2(cx + w, yy));
+
+            float fill = Mathf.Clamp01(dashCharges - i);           // 1=lista, parcial=recargando
+            if (fill > 0f)
+            {
+                p.strokeColor = Bone;
+                Line(p, new Vector2(cx, yy), new Vector2(cx + fill * w, yy));
+            }
+        }
     }
 
     // Arcos rojos que apuntan al origen del dano reciente y se desvanecen.

@@ -95,9 +95,12 @@ public class HudController : MonoBehaviour
 
     void Update()
     {
-        // La stamina cambia de forma continua (drena/regenera) -> se refresca cada frame.
+        // La stamina y las cargas de dash cambian continuamente -> se refrescan cada frame.
         if (crosshair != null && playerMovement != null)
+        {
             crosshair.Shield = playerMovement.Stamina01;
+            crosshair.SetDash(playerMovement.DashCharges, playerMovement.MaxDashCharges);
+        }
     }
 
     void OnHealthChanged(int current, int max) => RefreshHealth();
