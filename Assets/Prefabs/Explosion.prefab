@@ -10,7 +10,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1737767616090783438}
   - component: {fileID: 4914482611310526758}
-  - component: {fileID: 8229727564911960190}
   m_Layer: 0
   m_Name: Explosion
   m_TagString: Untagged
@@ -131,19 +130,6 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
---- !u!114 &8229727564911960190
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9123729595262269539}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c48f05c63040171438bfa37d4a2bc776, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ShooterDem.AutoDestroy
-  lifetime: 3
 --- !u!1001 &6041168542022025299
 PrefabInstance:
   m_ObjectHideFlags: 0
