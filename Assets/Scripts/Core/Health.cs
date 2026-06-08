@@ -18,6 +18,8 @@ public abstract class Health : MonoBehaviour, IDamageable
     // Ventanitas de solo-lectura.
     public int CurrentHealth => currentHealth;
     public bool IsDead => isDead;
+    // i-frames: si esta activo, ignora el dano (p. ej. durante el dash del jugador).
+    public bool Invulnerable { get; set; }
 
     // (vidaActual, vidaMax) cada vez que recibe dano. Lo consume el HUD.
     public event Action<int, int> Damaged;
@@ -50,7 +52,7 @@ public abstract class Health : MonoBehaviour, IDamageable
 
     public void TakeDamage(int amount)
     {
-        if (isDead) return; // ya muerto: ignora golpes extra
+        if (isDead || Invulnerable) return; // muerto o invulnerable: ignora el golpe
 
         currentHealth -= amount;
         if (currentHealth < 0) currentHealth = 0;   // nunca mostrar vida negativa

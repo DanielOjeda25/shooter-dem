@@ -21,8 +21,22 @@ public class PlayerHealth : Health
     // a recargas de escena (el nuevo Player se republica en su OnEnable).
     public static PlayerHealth Current { get; private set; }
 
+    private PlayerMovement movement;
+
+    protected override void Awake()
+    {
+        base.Awake();
+        movement = GetComponent<PlayerMovement>();
+    }
+
     void OnEnable()  { Current = this; }
     void OnDisable() { if (Current == this) Current = null; }
+
+    // i-frames mientras dashea: esquivar de verdad evita el dano.
+    void Update()
+    {
+        Invulnerable = movement != null && movement.IsDashing;
+    }
 
     protected override void OnDeath()
     {

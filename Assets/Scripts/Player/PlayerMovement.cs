@@ -26,6 +26,13 @@ public class PlayerMovement : MonoBehaviour
     public float dashDuration = 0.18f; // cuanto dura el impulso
     public float dashCooldown = 1.2f;  // espera entre dashes
 
+    [Header("Stamina (la comparten sprint y dash)")]
+    public float maxStamina = 100f;
+    public float sprintDrain = 22f;        // gasto por segundo esprintando
+    public float dashCost = 35f;           // gasto por cada dash
+    public float staminaRegen = 28f;       // recuperacion por segundo
+    public float staminaRegenDelay = 0.7f; // respiro tras el ultimo uso antes de regenerar
+
     [Header("Agacharse")]
     public float crouchHeight = 1.3f;          // altura del collider agachado
     public float crouchTransitionSpeed = 10f;  // suavizado de la altura
@@ -43,8 +50,12 @@ public class PlayerMovement : MonoBehaviour
     private float dashTimer;          // tiempo restante del dash en curso
     private float dashCooldownTimer;  // espera hasta el proximo dash
     private Vector3 dashDir;          // direccion del dash actual
+    private float stamina;
+    private float lastStaminaUse;
+    private bool exhausted;           // true al agotar stamina; se limpia al recuperar 30%
 
     public bool IsDashing => dashTimer > 0f;
+    public float Stamina01 => maxStamina > 0f ? stamina / maxStamina : 0f;
 
     // Se dispara al aterrizar; el float es la velocidad de caida (para el dip de camara).
     public event System.Action<float> Landed;
@@ -62,6 +73,7 @@ public class PlayerMovement : MonoBehaviour
         controller = GetComponent<CharacterController>();
         standHeight = controller.height;       // tomamos la altura actual como "de pie"
         standCenterY = controller.center.y;
+        stamina = maxStamina;
     }
 
     void Update()
@@ -87,8 +99,12 @@ public class PlayerMovement : MonoBehaviour
         Vector3 move = transform.right * input.x + transform.forward * input.y;
         move = Vector3.ClampMagnitude(move, 1f); // la diagonal no debe ir mas rapida
 
-        // --- Sprint: Shift + avanzando + no agachado ---
-        isSprinting = kb != null && kb.leftShiftKey.isPressed && input.y > 0.1f && !isCrouching;
+        // --- Sprint: Shift + avanzando + no agachado, y CON stamina ---
+        // Si la agotas, quedas "exhausted" hasta recuperar el 30% (evita parpadeo cerca de 0).
+        if (stamina <= 0f) exhausted = true;
+        else if (exhausted && stamina >= maxStamina * 0.3f) exhausted = false;
+        bool wantsSprint = kb != null && kb.leftShiftKey.isPressed && input.y > 0.1f && !isCrouching;
+        isSprinting = wantsSprint && !exhausted;
 
         float speed = isCrouching ? crouchSpeed : (isSprinting ? sprintSpeed : walkSpeed);
 
@@ -122,7 +138,8 @@ public class PlayerMovement : MonoBehaviour
 
         // --- Dash / esquiva (Alt izq): impulso corto en la direccion de movimiento ---
         dashCooldownTimer -= Time.deltaTime;
-        if (kb != null && kb.leftAltKey.wasPressedThisFrame && dashCooldownTimer <= 0f && !isCrouching)
+        if (kb != null && kb.leftAltKey.wasPressedThisFrame && dashCooldownTimer <= 0f
+            && !isCrouching && stamina >= dashCost)
         {
             // Hacia donde te mueves; si estas quieto, hacia donde miras.
             dashDir = move.sqrMagnitude > 0.01f ? move.normalized : transform.forward;
@@ -130,6 +147,8 @@ public class PlayerMovement : MonoBehaviour
             dashDir = dashDir.normalized;
             dashTimer = dashDuration;
             dashCooldownTimer = dashCooldown;
+            stamina -= dashCost;              // el dash cuesta stamina
+            lastStaminaUse = Time.time;
         }
 
         // Durante el dash, la horizontal se sustituye por el impulso (ignora walk/sprint).
@@ -147,6 +166,18 @@ public class PlayerMovement : MonoBehaviour
         // --- Aplicar todo en un solo Move (horizontal + vertical) ---
         Vector3 velocity = horizontal + Vector3.up * verticalVelocity;
         controller.Move(velocity * Time.deltaTime);
+
+        // --- Stamina: el sprint la gasta; se regenera tras un respiro sin usarla ---
+        if (isSprinting)
+        {
+            stamina -= sprintDrain * Time.deltaTime;
+            lastStaminaUse = Time.time;
+        }
+        else if (Time.time >= lastStaminaUse + staminaRegenDelay)
+        {
+            stamina += staminaRegen * Time.deltaTime;
+        }
+        stamina = Mathf.Clamp(stamina, 0f, maxStamina);
     }
 
     void UpdateCrouch(bool crouchHeld)

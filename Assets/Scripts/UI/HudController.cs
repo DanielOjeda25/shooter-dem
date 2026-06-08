@@ -23,6 +23,7 @@ public class HudController : MonoBehaviour
     private CrosshairArcs crosshair;   // arcos del reticle (vida/escudo/cargador/reserva)
     private DamageVignette vignette;   // bordes rojos al recibir dano / vida baja
     private Camera cam;                // para calcular la direccion del dano (cacheada)
+    private PlayerMovement playerMovement;  // para mostrar la stamina (sprint/dash)
 
     void OnEnable()
     {
@@ -81,13 +82,22 @@ public class HudController : MonoBehaviour
         // Reticle con arcos: lo creamos por codigo y lo anadimos como overlay (encima).
         crosshair = new CrosshairArcs();
         root.Add(crosshair);
-        crosshair.Shield = 1f;    // placeholder hasta que exista el sistema de escudo
+        // El arco superior-izquierdo (antes "escudo") muestra la STAMINA (sprint/dash).
+        playerMovement = playerHealth != null ? playerHealth.GetComponent<PlayerMovement>() : null;
+        crosshair.Shield = playerMovement != null ? playerMovement.Stamina01 : 1f;
         crosshair.Reserve = 1f;   // placeholder hasta que exista la municion de reserva
 
         RefreshHealth();
         RefreshAmmo();
         RefreshWave();
         if (weaponManager != null) SetWeaponName(weaponManager.CurrentWeapon);
+    }
+
+    void Update()
+    {
+        // La stamina cambia de forma continua (drena/regenera) -> se refresca cada frame.
+        if (crosshair != null && playerMovement != null)
+            crosshair.Shield = playerMovement.Stamina01;
     }
 
     void OnHealthChanged(int current, int max) => RefreshHealth();

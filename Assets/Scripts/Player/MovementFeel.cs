@@ -37,10 +37,16 @@ public class MovementFeel : MonoBehaviour
     public float landingDipScale = 0.04f;  // hundimiento por unidad de velocidad de caida
     public float maxLandingDip = 0.18f;    // tope del hundimiento
 
+    [Header("Dash (punch de FOV)")]
+    public float dashFovPunch = 12f;       // grados extra de FOV durante el dash
+    public float fovLerpSpeed = 9f;
+
     private Vector3 holderRestPos;
     private Quaternion holderRestRot;
     private float eyeBase, baseX, baseZ;   // base de la camara (sin bob/dip)
     private float bobTimer, bobBlend, dip; // estado del head-bob y del dip de aterrizaje
+    private Camera cam;                    // para el punch de FOV
+    private float baseFov;
 
     void OnEnable()  { if (movement != null) movement.Landed += OnLanded; }
     void OnDisable() { if (movement != null) movement.Landed -= OnLanded; }
@@ -52,6 +58,8 @@ public class MovementFeel : MonoBehaviour
             baseX = cameraTransform.localPosition.x;
             baseZ = cameraTransform.localPosition.z;
             eyeBase = cameraTransform.localPosition.y;
+            cam = cameraTransform.GetComponent<Camera>();
+            if (cam != null) baseFov = cam.fieldOfView;
         }
         else eyeBase = standEyeHeight;
 
@@ -101,6 +109,13 @@ public class MovementFeel : MonoBehaviour
             Quaternion targetRot = holderRestRot * Quaternion.Euler(sprint ? sprintWeaponTilt : Vector3.zero);
             weaponHolder.localPosition = Vector3.Lerp(weaponHolder.localPosition, targetPos, t);
             weaponHolder.localRotation = Quaternion.Slerp(weaponHolder.localRotation, targetRot, t);
+        }
+
+        // --- Punch de FOV al dashear (sensacion de velocidad) ---
+        if (cam != null)
+        {
+            float targetFov = baseFov + (movement.IsDashing ? dashFovPunch : 0f);
+            cam.fieldOfView = Mathf.Lerp(cam.fieldOfView, targetFov, fovLerpSpeed * Time.deltaTime);
         }
     }
 }
