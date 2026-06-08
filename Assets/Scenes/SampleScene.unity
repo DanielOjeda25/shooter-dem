@@ -803,6 +803,8 @@ MonoBehaviour:
   crouchSpeed: 3
   jumpHeight: 1.2
   gravity: -9.81
+  coyoteTime: 0.12
+  jumpBuffer: 0.12
   crouchHeight: 1.3
   crouchTransitionSpeed: 10
 --- !u!143 &597900054
@@ -884,6 +886,12 @@ MonoBehaviour:
   sprintWeaponOffset: {x: 0, y: -0.05, z: -0.1}
   sprintWeaponTilt: {x: 20, y: 0, z: -10}
   feelSpeed: 10
+  walkBobSpeed: 9
+  sprintBobSpeed: 13
+  bobAmpY: 0.02
+  bobAmpX: 0.03
+  landingDipScale: 0.04
+  maxLandingDip: 0.18
 --- !u!114 &597900058
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6681,6 +6689,7 @@ MonoBehaviour:
   weapon: {fileID: 1482782264}
   waveSystem: {fileID: 1902528918}
   weaponManager: {fileID: 1482782269}
+  playerHitShake: 0.35
 --- !u!114 &2122434681
 MonoBehaviour:
   m_ObjectHideFlags: 0
