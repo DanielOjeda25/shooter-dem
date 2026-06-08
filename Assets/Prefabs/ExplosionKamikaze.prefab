@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 1737767616090783438}
   - component: {fileID: 4914482611310526758}
   m_Layer: 0
-  m_Name: Explosion
+  m_Name: ExplosionKamikaze
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -44,7 +44,7 @@ AudioSource:
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 0}
-  m_Resource: {fileID: 8300000, guid: 7d426e4983e1d334bbd47064105268f5, type: 3}
+  m_Resource: {fileID: 8300000, guid: f09ca70cd81c13d4aa447613e9e8b11b, type: 3}
   m_PlayOnAwake: 1
   m_Volume: 0.9
   m_Pitch: 1

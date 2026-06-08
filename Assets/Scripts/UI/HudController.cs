@@ -19,6 +19,10 @@ public class HudController : MonoBehaviour
     [Header("Feedback de dano")]
     public float playerHitShake = 0.35f;   // sacudida de camara al recibir dano
 
+    [Header("Hitmarker")]
+    public AudioClip hitmarkerClip;        // tic 2D al confirmar impacto en un enemigo
+    private AudioSource hitAudio;          // fuente 2D (se crea sola en Start)
+
     private Label healthValue, ammoValue, weaponName, waveValue;
     private CrosshairArcs crosshair;   // arcos del reticle (vida/escudo/cargador/reserva)
     private DamageVignette vignette;   // bordes rojos al recibir dano / vida baja
@@ -30,6 +34,7 @@ public class HudController : MonoBehaviour
         if (playerHealth != null) playerHealth.Damaged += OnHealthChanged;
         if (weapon != null) weapon.AmmoChanged += RefreshAmmo;
         if (weapon != null) weapon.Fired += OnFired;
+        if (weapon != null) weapon.Hit += OnWeaponHit;
         if (waveSystem != null) waveSystem.WaveChanged += OnWaveChanged;
         if (weaponManager != null) weaponManager.WeaponSwitched += OnWeaponSwitched;
         if (playerHealth != null) playerHealth.Hit += OnPlayerHit;
@@ -40,6 +45,7 @@ public class HudController : MonoBehaviour
         if (playerHealth != null) playerHealth.Damaged -= OnHealthChanged;
         if (weapon != null) weapon.AmmoChanged -= RefreshAmmo;
         if (weapon != null) weapon.Fired -= OnFired;
+        if (weapon != null) weapon.Hit -= OnWeaponHit;
         if (waveSystem != null) waveSystem.WaveChanged -= OnWaveChanged;
         if (weaponManager != null) weaponManager.WeaponSwitched -= OnWeaponSwitched;
         if (playerHealth != null) playerHealth.Hit -= OnPlayerHit;
@@ -65,6 +71,14 @@ public class HudController : MonoBehaviour
         if (crosshair != null) crosshair.Kick();   // los arcos se "abren" al disparar
     }
 
+    // Disparo confirmado sobre un enemigo: X en la mira + tic 2D (feedback del jugador).
+    void OnWeaponHit(RaycastHit hit, bool hitDamageable)
+    {
+        if (!hitDamageable) return;
+        if (crosshair != null) crosshair.Hitmarker();
+        if (hitmarkerClip != null && hitAudio != null) hitAudio.PlayOneShot(hitmarkerClip);
+    }
+
     void Start()
     {
         // El UIDocument construye su arbol en su OnEnable; Start corre despues, asi
@@ -86,6 +100,12 @@ public class HudController : MonoBehaviour
         playerMovement = playerHealth != null ? playerHealth.GetComponent<PlayerMovement>() : null;
         crosshair.Shield = playerMovement != null ? playerMovement.Stamina01 : 1f;
         crosshair.Reserve = 1f;   // placeholder hasta que exista la municion de reserva
+
+        // Fuente 2D para el hitmarker (la creamos si el GameObject no tiene AudioSource).
+        hitAudio = GetComponent<AudioSource>();
+        if (hitAudio == null) hitAudio = gameObject.AddComponent<AudioSource>();
+        hitAudio.playOnAwake = false;
+        hitAudio.spatialBlend = 0f;   // 2D: feedback directo para el jugador
 
         RefreshHealth();
         RefreshAmmo();

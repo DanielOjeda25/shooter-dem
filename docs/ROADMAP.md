@@ -133,6 +133,15 @@ enemigos por NavMesh, reglas/HUD/game over) ya hay buena parte de la Visión v2.
 - **Enemigos**: ✅ **4 tipos** — melee, **kamikaze** (explosión en cadena), **ranged** (proyectil
   esquivable, mantiene distancia) y **tanque** (lento, mucha vida, golpe fuerte). Sistema data-driven
   (`EnemyData` SO) + spawner multi-tipo ponderado.
+- **Detección / aggro** (`EnemyAI`): ✅ los enemigos están **DORMIDOS** hasta que el jugador entra en
+  `detectionRange` → despiertan (evento `Aggroed`, sticky) y persiguen. **Clave para mapas grandes +
+  rendimiento**: un dormido solo hace un check de distancia/frame (no calcula ruta). Base para
+  **activación por zonas**. Pendiente futuro: line-of-sight, aggro al recibir daño, "leash".
+- **Audio de enemigos** (`EnemyAudio`): ✅ componente por prefab con `AudioSource` **3D** — idle loop,
+  alerta al detectar, golpe (`attackClips`), daño (`Health.Damaged`) y muerte (`Health.Died`).
+  **Cableado en los 4 tipos** (melee/kamikaze/ranged/tank). El **disparo del ranged** y la muerte de
+  todos funcionan. La muerte usa **`PooledSfx`** (prefab `SfxOneShot`): un audio que se saca del pool
+  y **sobrevive** al reciclaje del enemigo (el kamikaze no lo usa: su muerte es `ExplosionKamikaze`).
 - **VFX (realistas, URP)**: ✅ migrados a **packs gratis** (Vefects Free Blood/Free Fire,
   Gabriel Aguiar Free Quick Effects); `WeaponEffects` con pooling — fogonazo/humo/impacto/sangre
   y explosión por prefab. Tamaño/color en el prefab, no en código.

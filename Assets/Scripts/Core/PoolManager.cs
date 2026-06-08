@@ -74,7 +74,7 @@ public class PoolManager : MonoBehaviour
     {
         var pool = PoolFor(prefab);
         var go = pool.Get(pos, rot);
-        RestartParticles(go);
+        RestartEffects(go);
         StartCoroutine(ReturnAfter(pool, go, life));
     }
 
@@ -94,9 +94,11 @@ public class PoolManager : MonoBehaviour
         pool.Return(go);   // null-safe dentro de PrefabPool
     }
 
-    // Reinicia los ParticleSystem del efecto (los packs son multi-sistema) y fuerza
-    // stopAction=None para que NUNCA se autodestruyan (eso romperia el pool).
-    static void RestartParticles(GameObject go)
+    // Reinicia el efecto al sacarlo del pool: ParticleSystem y AudioSource. Ninguno de los
+    // dos se redispara solo al REACTIVAR un objeto reciclado (el Awake/playOnAwake ya paso),
+    // asi que hay que relanzarlos a mano. En las particulas ademas fuerza stopAction=None
+    // para que NUNCA se autodestruyan (eso romperia el pool).
+    static void RestartEffects(GameObject go)
     {
         var systems = go.GetComponentsInChildren<ParticleSystem>(true);
         for (int i = 0; i < systems.Length; i++)
@@ -106,6 +108,11 @@ public class PoolManager : MonoBehaviour
         }
         for (int i = 0; i < systems.Length; i++) systems[i].Clear(false);
         for (int i = 0; i < systems.Length; i++) systems[i].Play(false);
+
+        // playOnAwake no re-suena al reactivar desde el pool: lo reproducimos a mano.
+        var sources = go.GetComponentsInChildren<AudioSource>(true);
+        for (int i = 0; i < sources.Length; i++)
+            if (sources[i].playOnAwake && sources[i].clip != null) sources[i].Play();
     }
 }
 }

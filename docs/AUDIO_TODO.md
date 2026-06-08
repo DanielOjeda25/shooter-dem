@@ -22,6 +22,10 @@
 | **Escopeta** | `sg_fire1..4`, `sg_reload1..3`, `sg_cock`, `sg_empty` | `WeaponData` |
 | **Bazooka** | `rocketfire1` (solo el disparo) | `WeaponData` |
 | **Compartidos** | `weapon_switch` (cambio de arma), `pl_shell1..3` (casquillos) | `WeaponManager`, `WeaponEffects` |
+| **Dash** | `Player/dash.wav` (whoosh de esquiva) | `PlayerMovement.cs` (`PlayOneShot` al iniciar el dash) |
+| **Melee (ataque)** | `monsterAttack-mele.mp3` | `EnemyAudio` (prefab Enemy) — `attackClips`, lo dispara `EnemyAI` tras `Execute` |
+| **Kamikaze** | `kamikazeIdle` (loop), `kamikazeAlert`+`kamikazeScream_1` (alerta), `kamikazeExplosion` (muerte) | `EnemyAudio` (prefab Kamikaze) + prefab `ExplosionKamikaze` |
+| **Enemigos (común)** | `enemyHurt`+`enemyHurt2` (daño), `enemyDeath` (muerte), `enemyShoot` (ranged) | `EnemyAudio` en los 4 prefabs; muerte vía `PooledSfx`/`SfxOneShot` |
 
 `WeaponData` (SO) ya expone: `fireClips[]`, `reloadClips[]`, `emptyClip`. Cualquier arma nueva
 solo necesita arrastrar clips ahí (sin tocar código).
@@ -33,7 +37,7 @@ solo necesita arrastrar clips ahí (sin tocar código).
 ### 1) Movimiento del jugador  (`PlayerMovement.cs` — hoy NO tiene audio)
 | Sonido | Acción / tecla | Falta | Prioridad |
 |---|---|---|---|
-| **Dash / esquiva** | Alt (whoosh corto) | clip + código | 🔴 |
+| ~~**Dash / esquiva**~~ | Alt (whoosh corto) | ✅ **HECHO** (`Player/dash.wav`) | ✅ |
 | **Salto** | Espacio (esfuerzo/tela) | clip + código | 🟡 |
 | **Aterrizaje** | al tocar suelo tras caer | clip + código | 🟡 |
 | **Agacharse / levantarse** | Ctrl (roce de tela) | clip + código | ⚪ |
@@ -50,25 +54,34 @@ solo necesita arrastrar clips ahí (sin tocar código).
 ### 3) Enemigos  (`EnemyData.cs` NO tiene campos de audio — hay que añadirlos)
 | Sonido | Cuándo | Falta | Prioridad |
 |---|---|---|---|
-| **Muerte del enemigo** (vocal) | `EnemyHealth.OnDeath` | clip + código | 🔴 |
-| **Ataque melee** (zarpazo/golpe) | `MeleeAttack` | clip + código | 🔴 |
-| **Detección / aggro / gruñido** | al ver al jugador (`EnemyAI`) | clip + código | 🟡 |
-| **Disparo enemigo ranged** | `RangedAttack` lanza proyectil | clip + código | 🟡 |
+| ~~**Muerte del enemigo** (vocal)~~ | `Health.Died` | ✅ **HECHO** (`enemyDeath.mp3` vía `PooledSfx`) | ✅ |
+| ~~**Ataque melee** (zarpazo/golpe)~~ | `MeleeAttack` | ✅ **HECHO** (`monsterAttack-mele.mp3`) | ✅ |
+| ~~**Detección / aggro / gruñido**~~ | al detectar al jugador (`EnemyAI.Aggroed`) | ✅ **HECHO** (kamikaze: alert+scream) | ✅ |
+| ~~**Disparo enemigo ranged**~~ | `RangedAttack` (vía `EnemyAI.PlayAttack`) | ✅ **HECHO** (`enemyShoot.wav`) | ✅ |
 | **Proyectil enemigo: vuelo + impacto** | `EnemyProjectile.cs` (sin audio) | clip + código | 🟡 |
-| **Kamikaze: mecha/silbido al cargar** | mientras corre a explotar | clip + código | 🟡 |
-| **Tanque: pisada pesada / golpe fuerte** | enemigo tanque | clip + código | ⚪ |
-| Quejido al ser herido (vocal) | `TakeDamage` (además del `flesh`) | clip + código | ⚪ |
+| ~~**Kamikaze: gruñido / idle al acercarse**~~ | mientras corre a explotar | ✅ **HECHO** (`kamikazeIdle` loop 3D) | ✅ |
+| **Tanque: pisada pesada / golpe fuerte** | enemigo tanque | clip + código (falta clip propio) | ⚪ |
+| ~~Quejido al ser herido (vocal)~~ | `Health.Damaged` (no letal) | ✅ **HECHO** (`enemyHurt`+`enemyHurt2`) | ✅ |
 
-> Sugerencia técnica: añadir a `EnemyData` campos como `deathClips[]`, `attackClips[]`,
-> `alertClips[]` (igual que `WeaponData`) para que sea data-driven por tipo de enemigo.
+> ✅ **Arquitectura hecha:** componente **`EnemyAudio`** en el prefab del enemigo (no en `EnemyData`,
+> que es solo spawn). `AudioSource` **3D** (oyes de dónde viene cada enemigo) + campos `idleLoop`,
+> `alertClips[]`, `attackClips[]`, `hurtClips[]`, `deathClips[]`. Reacciona a `EnemyAI.Aggroed`
+> (detección), `EnemyAI.PlayAttack()`, `Health.Damaged` (hurt no letal) y `Health.Died` (muerte).
+> **Cableado en los 4 tipos** (melee/kamikaze/ranged/tank). Enemigo nuevo = arrastrar clips, sin código.
+>
+> ✅ **Muerte del enemigo (resuelto):** el enemigo vuelve al pool al morir (su `AudioSource` se
+> cortaría), así que el clip suena en un objeto **independiente que sobrevive**: **`PooledSfx`**
+> (prefab `SfxOneShot`) — se saca del pool, suena en su posición y vuelve solo al terminar. El
+> kamikaze no usa `deathClips` (su muerte ES la explosión `ExplosionKamikaze`).
 
-### 4) Explosiones  (`Projectile.cs` y `KamikazeAttack.cs` — sin clip)
+### 4) Explosiones  (`Projectile.cs` y `KamikazeAttack.cs`)
 | Sonido | Cuándo | Falta | Prioridad |
 |---|---|---|---|
-| **Explosión** (bazooka + kamikaze) | al impactar / al morir kamikaze | clip + código | 🔴 |
+| ~~**Explosión** (bazooka + kamikaze)~~ | al impactar / al morir kamikaze | ✅ **HECHO** (`Explosions/bazookaExplosion.wav`) | ✅ |
 
-> El `ROADMAP` ya marca la explosión como **placeholder**. Es **1 clip reutilizable** para
-> ambos (bazooka y kamikaze), igual que el prefab de VFX de explosión.
+> ✅ El clip vive en el **`AudioSource` del prefab `Explosion`** (`PlayOnAwake`), reutilizado por
+> bazooka y kamikaze sin código. `PoolManager.RestartEffects` reinicia el `AudioSource` al sacar
+> el efecto del pool, así suena en **cada** explosión (no solo la primera).
 
 ### 5) Armas — huecos sueltos
 | Sonido | Arma | Falta | Prioridad |
@@ -76,7 +89,7 @@ solo necesita arrastrar clips ahí (sin tocar código).
 | **Recarga / cargar cohete** | Bazooka (solo tiene `rocketfire1`) | clip | 🟡 |
 | **Clic sin munición** | Bazooka (`emptyClip` vacío) | clip | ⚪ |
 | Cola/silbido del cohete en vuelo | Bazooka | clip + código | ⚪ |
-| **Hitmarker** (confirmación de impacto) | todas | clip + código | 🟡 |
+| ~~**Hitmarker** (confirmación de impacto)~~ | todas (`Weapon.Hit`→`HudController`) | ✅ **HECHO** (`UI/hitmarker.mp3` + **X** visual en el crosshair) | ✅ |
 
 ### 6) Oleadas y fin de partida  (`WaveSystem.cs`, `GameManager.cs` — sin audio)
 | Sonido | Cuándo | Falta | Prioridad |
@@ -107,10 +120,10 @@ solo necesita arrastrar clips ahí (sin tocar código).
 ---
 
 ## Resumen rápido — lo más urgente (🔴)
-1. **Dash** (whoosh).
-2. **Daño y muerte del jugador**.
-3. **Muerte del enemigo** + **ataque melee**.
-4. **Explosión** (bazooka + kamikaze) — reemplazar placeholder.
+1. ~~**Dash** (whoosh).~~ ✅ HECHO
+2. **Daño y muerte del jugador**. ← *único 🔴 que queda (lo grabás vos)*
+3. ~~**Muerte del enemigo** + **ataque melee**.~~ ✅ HECHO (+ hurt + disparo ranged)
+4. ~~**Explosión** (bazooka + kamikaze).~~ ✅ HECHO
 
 ## Notas
 - **Formato**: `.wav` (como el resto del proyecto). Mono para SFX 3D posicional.

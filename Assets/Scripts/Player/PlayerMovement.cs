@@ -25,6 +25,10 @@ public class PlayerMovement : MonoBehaviour
     public float dashSpeed = 22f;       // velocidad del impulso
     public float dashDuration = 0.18f;  // cuanto dura el impulso
 
+    [Header("Audio del dash")]
+    public AudioClip dashClip;          // el whoosh que suena al esquivar
+    private AudioSource audioSource;    // el "altavoz" que lo reproduce
+
     [Header("Stamina (la comparten sprint y dash)")]
     public float maxStamina = 100f;
     public float sprintDrain = 34f;        // mas alto: el sprint dura menos
@@ -72,6 +76,7 @@ public class PlayerMovement : MonoBehaviour
         standHeight = controller.height;       // tomamos la altura actual como "de pie"
         standCenterY = controller.center.y;
         stamina = maxStamina;
+        audioSource = GetComponent<AudioSource>(); // reutiliza el AudioSource del Player
     }
 
     void Update()
@@ -144,6 +149,10 @@ public class PlayerMovement : MonoBehaviour
             dashTimer = dashDuration;
             stamina -= dashCost;          // el dash bebe de la misma stamina que el sprint
             lastStaminaUse = Time.time;
+
+            // Sonido: una sola vez, en el frame que arranca el dash.
+            if (dashClip != null && audioSource != null)
+                audioSource.PlayOneShot(dashClip);
         }
 
         // Durante el dash, la horizontal se sustituye por el impulso (ignora walk/sprint).

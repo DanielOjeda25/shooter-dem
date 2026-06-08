@@ -18,6 +18,12 @@ public class EnemyAI : MonoBehaviour, IKnockbackable
     // (se aleja si esta mas cerca, se acerca si esta mas lejos). 0 = perseguir siempre (melee).
     public float keepDistance = 0f;
 
+    [Header("Deteccion / aggro")]
+    // El enemigo esta DORMIDO (sin perseguir) hasta que el jugador entra en este radio.
+    // Entonces "despierta" (aggro, sticky), avisa con el evento Aggroed y empieza a perseguir.
+    // Clave para mapas grandes: un dormido casi no cuesta (solo un check de distancia/frame).
+    public float detectionRange = 25f;
+
     [Header("Rendimiento")]
     // Recalcular la ruta cada frame por enemigo no escala a hordas. Lo hacemos
     // cada repathInterval segundos, escalonado entre enemigos para no sincronizar.
@@ -39,11 +45,17 @@ public class EnemyAI : MonoBehaviour, IKnockbackable
     private Vector3 knockbackVel;          // velocidad de empuje actual (decae)
     private float baseSpeed;               // velocidad original del agente (sin escalar)
 
+    // Se dispara la PRIMERA vez que el enemigo detecta al jugador (lo escucha EnemyAudio).
+    public event System.Action Aggroed;
+    private bool aggro;                     // true = ya despierto (sticky hasta morir/reciclar)
+    private EnemyAudio enemyAudio;          // SFX del enemigo (opcional; puede no estar)
+
     void Awake()
     {
         // Cacheamos componentes una vez.
         agent = GetComponent<NavMeshAgent>();
         attack = GetComponent<EnemyAttack>();   // la estrategia de ataque del prefab
+        enemyAudio = GetComponent<EnemyAudio>(); // SFX (opcional)
         baseSpeed = agent.speed;                // guardamos la velocidad base del prefab
     }
 
@@ -60,6 +72,8 @@ public class EnemyAI : MonoBehaviour, IKnockbackable
         repathTimer = Random.value * repathInterval;
         knockbackTimer = 0f;            // por si se reutiliza desde el pool
         knockbackVel = Vector3.zero;    // sin empuje residual de la vida anterior
+        aggro = false;                  // al reactivar del pool vuelve a DORMIR
+        if (agent != null && agent.isOnNavMesh) agent.ResetPath();  // sin destino de la vida anterior
 
         // Velocidad escalada por la dificultad (nivel + oleada).
         if (agent != null) agent.speed = baseSpeed * Difficulty.EnemySpeed;
@@ -96,6 +110,16 @@ public class EnemyAI : MonoBehaviour, IKnockbackable
             return;
         }
 
+        // --- Deteccion / aggro: DORMIDO hasta que el jugador entra en detectionRange ---
+        if (!aggro)
+        {
+            Vector3 toPlayer = target.position - transform.position;
+            if (toPlayer.sqrMagnitude > detectionRange * detectionRange)
+                return;                  // sigue dormido: coste casi nulo (esto es lo que escala)
+            aggro = true;                // despierta (sticky)
+            Aggroed?.Invoke();           // EnemyAudio reproduce el grito de alerta
+        }
+
         // Repath con throttle: solo recalculamos la ruta cada repathInterval seg
         // (no cada frame). El NavMeshAgent sigue moviendose suave entre recalculos.
         repathTimer -= Time.deltaTime;
@@ -113,6 +137,7 @@ public class EnemyAI : MonoBehaviour, IKnockbackable
         {
             lastAttackTime = Time.time;
             attack?.Execute(target);
+            enemyAudio?.PlayAttack();   // SFX de ataque (data-driven en el prefab)
         }
 
         // Enemigos a distancia: mirar al jugador (para que el arma apunte de frente).

@@ -61,6 +61,10 @@ public class CrosshairArcs : VisualElement
     readonly float[] dmgAngle = new float[MaxDamage];   // angulo: 0=de frente, +=derecha
     readonly float[] dmgLife = new float[MaxDamage];    // 1..0 (se desvanece)
 
+    // Hitmarker: X que parpadea al confirmar impacto en un enemigo (se desvanece rapido).
+    const float HitmarkerLife = 0.25f;   // segundos visible
+    private float hitmarkerLife;          // 1..0
+
     // Lo llama el HUD al recibir dano. angleFromFront: 0=de frente, +90=derecha,
     // -90=izquierda, +-180=a la espalda.
     public void AddDamage(float angleFromFront)
@@ -72,6 +76,9 @@ public class CrosshairArcs : VisualElement
         dmgLife[slot] = 1f;
         MarkDirtyRepaint();
     }
+
+    // Lo llama el HUD cuando un disparo conecta con un enemigo: X breve en la mira.
+    public void Hitmarker() { hitmarkerLife = 1f; MarkDirtyRepaint(); }
 
 
     static readonly Color Track = new Color(0.843f, 0.910f, 0.816f, 0.15f);
@@ -115,6 +122,12 @@ public class CrosshairArcs : VisualElement
                 changed = true;
             }
 
+        if (hitmarkerLife > 0f)
+        {
+            hitmarkerLife = Mathf.Max(0f, hitmarkerLife - 0.016f / HitmarkerLife);
+            changed = true;
+        }
+
         if (changed) MarkDirtyRepaint();
     }
 
@@ -147,8 +160,9 @@ public class CrosshairArcs : VisualElement
             DrawStat(p, c, OuterRadius, 0f, dReserve);   // reserva
         }
 
-        DrawReticle(p, c);   // mira central segun el arma (siempre visible)
-        DrawDamage(p, c);    // indicadores direccionales de dano (si los hay)
+        DrawReticle(p, c);    // mira central segun el arma (siempre visible)
+        DrawDamage(p, c);     // indicadores direccionales de dano (si los hay)
+        DrawHitmarker(p, c);  // X breve al confirmar impacto en enemigo
     }
 
     // Arcos rojos que apuntan al origen del dano reciente y se desvanecen.
@@ -169,6 +183,26 @@ public class CrosshairArcs : VisualElement
             p.Arc(c, r, Deg(screen - half), Deg(screen + half));
             p.Stroke();
         }
+    }
+
+    // X (4 diagonales con hueco central) que parpadea al confirmar impacto y se desvanece.
+    void DrawHitmarker(Painter2D p, Vector2 c)
+    {
+        if (hitmarkerLife <= 0f) return;
+        Color col = Bone; col.a = Mathf.Clamp01(hitmarkerLife);
+        p.strokeColor = col;
+        p.lineWidth = 2.5f;
+        const float gap = 5f, len = 6f, d = 0.70710678f;  // d = 1/sqrt(2) -> 45 grados
+        HitTick(p, c,  d,  d, gap, len);
+        HitTick(p, c, -d,  d, gap, len);
+        HitTick(p, c,  d, -d, gap, len);
+        HitTick(p, c, -d, -d, gap, len);
+    }
+
+    void HitTick(Painter2D p, Vector2 c, float dx, float dy, float gap, float len)
+    {
+        Vector2 dir = new Vector2(dx, dy);
+        Line(p, c + dir * gap, c + dir * (gap + len));
     }
 
     // Circulo casi-completo que gira: indica "recargando, no puedes disparar".
