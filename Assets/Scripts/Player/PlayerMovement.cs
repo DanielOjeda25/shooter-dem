@@ -21,6 +21,11 @@ public class PlayerMovement : MonoBehaviour
     public float coyoteTime = 0.12f;  // margen para saltar tras salir de un borde
     public float jumpBuffer = 0.12f;  // margen para registrar el salto justo antes de aterrizar
 
+    [Header("Dash / esquiva")]
+    public float dashSpeed = 22f;      // velocidad del impulso
+    public float dashDuration = 0.18f; // cuanto dura el impulso
+    public float dashCooldown = 1.2f;  // espera entre dashes
+
     [Header("Agacharse")]
     public float crouchHeight = 1.3f;          // altura del collider agachado
     public float crouchTransitionSpeed = 10f;  // suavizado de la altura
@@ -35,6 +40,11 @@ public class PlayerMovement : MonoBehaviour
     private float coyoteTimer;        // cuenta atras del coyote time
     private float jumpBufferTimer;    // cuenta atras del jump buffer
     private bool wasGrounded;         // para detectar el frame de aterrizaje
+    private float dashTimer;          // tiempo restante del dash en curso
+    private float dashCooldownTimer;  // espera hasta el proximo dash
+    private Vector3 dashDir;          // direccion del dash actual
+
+    public bool IsDashing => dashTimer > 0f;
 
     // Se dispara al aterrizar; el float es la velocidad de caida (para el dip de camara).
     public event System.Action<float> Landed;
@@ -110,8 +120,32 @@ public class PlayerMovement : MonoBehaviour
 
         verticalVelocity += gravity * Time.deltaTime;
 
-        // --- Aplicar todo en un solo Move ---
-        Vector3 velocity = move * speed + Vector3.up * verticalVelocity;
+        // --- Dash / esquiva (Alt izq): impulso corto en la direccion de movimiento ---
+        dashCooldownTimer -= Time.deltaTime;
+        if (kb != null && kb.leftAltKey.wasPressedThisFrame && dashCooldownTimer <= 0f && !isCrouching)
+        {
+            // Hacia donde te mueves; si estas quieto, hacia donde miras.
+            dashDir = move.sqrMagnitude > 0.01f ? move.normalized : transform.forward;
+            dashDir.y = 0f;
+            dashDir = dashDir.normalized;
+            dashTimer = dashDuration;
+            dashCooldownTimer = dashCooldown;
+        }
+
+        // Durante el dash, la horizontal se sustituye por el impulso (ignora walk/sprint).
+        Vector3 horizontal;
+        if (dashTimer > 0f)
+        {
+            dashTimer -= Time.deltaTime;
+            horizontal = dashDir * dashSpeed;
+        }
+        else
+        {
+            horizontal = move * speed;
+        }
+
+        // --- Aplicar todo en un solo Move (horizontal + vertical) ---
+        Vector3 velocity = horizontal + Vector3.up * verticalVelocity;
         controller.Move(velocity * Time.deltaTime);
     }
 
