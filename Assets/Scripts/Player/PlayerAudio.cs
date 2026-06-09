@@ -1,29 +1,37 @@
 using UnityEngine;
+using InfimaGames.LowPolyShooterPack;   // Movement del pack (eventos de salto/dash/stamina)
 
 namespace ShooterDem
 {
     /// <summary>
-    /// Voces del jugador (2D, feedback directo): quejido al recibir daño y grito al morir.
-    /// Escucha los eventos de `PlayerHealth` (Damaged / Died). Es 2D porque es feedback del
-    /// propio jugador, no algo posicional. El GameObject del player NO se destruye al morir
-    /// (solo hay game over), así que el grito de muerte suena bien desde su propia fuente.
-    /// Va en el GameObject raíz del player, junto a `PlayerHealth`.
+    /// Voces y sonidos del jugador (2D, feedback directo):
+    ///  - quejido al recibir daño y grito al morir (eventos de PlayerHealth)
+    ///  - salto, dash y "sin stamina" (eventos del Movement del pack)
+    /// Es 2D porque es feedback del propio jugador, no algo posicional.
+    /// Va en el GameObject raíz del player, junto a PlayerHealth (+ Movement del pack).
     /// </summary>
     [RequireComponent(typeof(PlayerHealth))]
     public class PlayerAudio : MonoBehaviour
     {
-        [Header("Clips (variantes = se elige una al azar)")]
+        [Header("Vida (variantes = se elige una al azar)")]
         public AudioClip[] hurtClips;   // al recibir daño NO letal
         public AudioClip[] deathClips;  // al morir
+
+        [Header("Movimiento (player del pack)")]
+        public AudioClip[] jumpClips;       // al saltar
+        public AudioClip[] dashClips;       // al dashear (Alt)
+        public AudioClip[] noStaminaClips;  // al intentar dashear sin stamina
 
         [Range(0f, 1f)] public float volume = 1f;
 
         private AudioSource source;
         private PlayerHealth health;
+        private Movement movement;   // player del pack (puede no estar -> null-safe)
 
         void Awake()
         {
             health = GetComponent<PlayerHealth>();
+            movement = GetComponent<Movement>();
             source = GetComponent<AudioSource>();
             if (source == null) source = gameObject.AddComponent<AudioSource>();
             source.playOnAwake = false;
@@ -37,6 +45,12 @@ namespace ShooterDem
                 health.Damaged += OnDamaged;
                 health.Died += OnDied;
             }
+            if (movement != null)
+            {
+                movement.Jumped += OnJump;
+                movement.Dashed += OnDash;
+                movement.StaminaDenied += OnNoStamina;
+            }
         }
 
         void OnDisable()
@@ -45,6 +59,12 @@ namespace ShooterDem
             {
                 health.Damaged -= OnDamaged;
                 health.Died -= OnDied;
+            }
+            if (movement != null)
+            {
+                movement.Jumped -= OnJump;
+                movement.Dashed -= OnDash;
+                movement.StaminaDenied -= OnNoStamina;
             }
         }
 
@@ -55,6 +75,10 @@ namespace ShooterDem
         }
 
         void OnDied() => PlayRandom(deathClips);
+
+        void OnJump() => PlayRandom(jumpClips);
+        void OnDash() => PlayRandom(dashClips);
+        void OnNoStamina() => PlayRandom(noStaminaClips);
 
         void PlayRandom(AudioClip[] clips)
         {

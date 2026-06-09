@@ -57,6 +57,11 @@ namespace InfimaGames.LowPolyShooterPack
         public float Stamina01 => staminaMax > 0f ? Mathf.Clamp01(stamina / staminaMax) : 0f;
         public bool IsDashing => dashTimer > 0f;
 
+        // Eventos para el audio del jugador (ASHFALL): los escucha PlayerAudio.
+        public event System.Action Jumped;
+        public event System.Action Dashed;
+        public event System.Action StaminaDenied;   // intento de dash sin stamina suficiente
+
         #endregion
 
         #region FIELDS
@@ -197,15 +202,23 @@ namespace InfimaGames.LowPolyShooterPack
 
             //Dash (ASHFALL): Alt izquierdo, si hay stamina y no esta dasheando ya.
             var kb = Keyboard.current;
-            if (dashTimer <= 0f && kb != null && kb.leftAltKey.wasPressedThisFrame && stamina >= dashCost)
+            if (dashTimer <= 0f && kb != null && kb.leftAltKey.wasPressedThisFrame)
             {
-                Vector2 mv = playerCharacter.GetInputMovement();
-                Vector3 dir = new Vector3(mv.x, 0f, mv.y);
-                dashDir = dir.sqrMagnitude > 0.01f
-                    ? transform.TransformDirection(dir.normalized)
-                    : transform.forward;
-                dashTimer = dashDuration;
-                stamina -= dashCost;
+                if (stamina >= dashCost)
+                {
+                    Vector2 mv = playerCharacter.GetInputMovement();
+                    Vector3 dir = new Vector3(mv.x, 0f, mv.y);
+                    dashDir = dir.sqrMagnitude > 0.01f
+                        ? transform.TransformDirection(dir.normalized)
+                        : transform.forward;
+                    dashTimer = dashDuration;
+                    stamina -= dashCost;
+                    Dashed?.Invoke();
+                }
+                else
+                {
+                    StaminaDenied?.Invoke();   // sin stamina para dashear
+                }
             }
             //Timer del dash + i-frames mientras dura.
             if (dashTimer > 0f) dashTimer -= Time.deltaTime;
@@ -252,6 +265,7 @@ namespace InfimaGames.LowPolyShooterPack
             {
                 yVel = jumpForce;
                 jumpQueued = false;
+                Jumped?.Invoke();
             }
             //Dash (ASHFALL): durante el dash, velocidad fija en la direccion del dash.
             if (IsDashing)
