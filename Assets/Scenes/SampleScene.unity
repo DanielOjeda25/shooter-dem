@@ -1189,7 +1189,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7088fd2ae2f501c4d8a6e0f73f7a042f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::WaveSystem
-  spawnEnemies: 0
+  spawnEnemies: 1
   totalWaves: 2
   baseEnemies: 5
   enemiesGrowthPerWave: 3
@@ -1409,7 +1409,7 @@ MonoBehaviour:
   waveSystem: {fileID: 1902528918}
   weaponManager: {fileID: 0}
   playerHitShake: 0.35
-  hitmarkerClip: {fileID: 0}
+  hitmarkerClip: {fileID: 8300000, guid: 8a400c54102652d479653f47fccd5c9d, type: 3}
 --- !u!114 &2122434681
 MonoBehaviour:
   m_ObjectHideFlags: 0
