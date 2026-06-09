@@ -178,9 +178,16 @@ namespace InfimaGames.LowPolyShooterPack
         /// Moves the camera to the character, processes jumping and plays sounds every frame.
         protected override  void Update()
         {
+            //ASHFALL: congelado (pausa / game over) -> cortar pasos y no procesar salto/dash.
+            if (Time.timeScale <= 0f)
+            {
+                if (audioSource != null && audioSource.isPlaying) audioSource.Pause();
+                return;
+            }
+
             //Get the equipped weapon!
             equippedWeapon = playerCharacter.GetInventory().GetEquipped();
-            
+
             //Play Sounds!
             PlayFootstepSounds();
 
