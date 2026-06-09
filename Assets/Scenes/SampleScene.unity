@@ -878,7 +878,7 @@ MonoBehaviour:
   deathClips:
   - {fileID: 8300000, guid: 5c1ced39580df3c4d993905d006fc246, type: 3}
   - {fileID: 8300000, guid: 9009ec4793312cf46bd61c3984941620, type: 3}
-  - {fileID: 8300000, guid: ceb82c4d1d61f2941a7223fd707884ca, type: 3}
+  - {fileID: 8300000, guid: 02ec2436d283aea45a210bc333d23de2, type: 3}
   jumpClips:
   - {fileID: 8300000, guid: bba3d3e2eb1a504448ae28ccb14b0daf, type: 3}
   - {fileID: 8300000, guid: 16ebdde249aaf744194de6fb1d993093, type: 3}
