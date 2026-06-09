@@ -243,6 +243,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ShooterDem.LpspBulletDamage
   damage: 34
+  fleshImpactPrefab: {fileID: 8417165741215866614, guid: cc1233ea9dbd88e49a000c3698ad422a, type: 3}
+  fleshImpactLifetime: 1.2
+  fleshSounds:
+  - {fileID: 8300000, guid: 4dc3a3023649a644b80124e116615318, type: 3}
+  - {fileID: 8300000, guid: 8c09db39c0ee1ed4a82ac9d6dcdbe843, type: 3}
+  - {fileID: 8300000, guid: c24c36b16c3712f4aa1684aebdbae587, type: 3}
+  - {fileID: 8300000, guid: b7d8ac3521f392a4786043565d859292, type: 3}
+  - {fileID: 8300000, guid: 203e8427623d3b94b970d345dffc160b, type: 3}
+  - {fileID: 8300000, guid: 119d93b3a654eb846a0ac5e01133b837, type: 3}
+  - {fileID: 8300000, guid: 672544e1d499eb84291b1a12f2301bdf, type: 3}
+  - {fileID: 8300000, guid: a12c908ffcae56b4ca251c9b367b3007, type: 3}
+  sfxPrefab: {fileID: 313156952767155808, guid: bd33a1ca0e214aa4eb82310cc1823721, type: 3}
+  sfxVolume: 1
+  spawnFloorDecal: 1
 --- !u!1 &1231345400216816
 GameObject:
   m_ObjectHideFlags: 0
