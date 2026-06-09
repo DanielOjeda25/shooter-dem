@@ -58,7 +58,15 @@ public class EnemyAudio : MonoBehaviour
         source.Stop();                  // corta el loop al volver al pool / morir
     }
 
-    void OnAggro() => PlayRandom(alertClips);
+    // Al DETECTAR al jugador: el "idle" lejano (ambiente de "hay un enemigo en la zona")
+    // ya no tiene sentido —el bicho te vio y grita—. Cortamos el loop para que el grito NO
+    // se solape con el gruñido. No vuelve (el aggro es sticky); al reciclar del pool,
+    // OnEnable reactiva el idle. Los enemigos sin idleLoop no se ven afectados.
+    void OnAggro()
+    {
+        if (idleLoop != null) { source.loop = false; source.Stop(); }
+        PlayRandom(alertClips);
+    }
 
     // La llama EnemyAI justo despues de Execute (sirve a cualquier tipo de ataque).
     public void PlayAttack() => PlayRandom(attackClips);
