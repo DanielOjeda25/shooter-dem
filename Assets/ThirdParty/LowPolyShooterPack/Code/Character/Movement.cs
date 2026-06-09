@@ -2,6 +2,7 @@
 
 using System.Linq;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace InfimaGames.LowPolyShooterPack
 {
@@ -28,6 +29,17 @@ namespace InfimaGames.LowPolyShooterPack
         [Tooltip("How fast the player moves while running."), SerializeField]
         private float speedRunning = 9.0f;
 
+        [Tooltip("Fuerza del salto (ASHFALL: el free sample no traia salto)."), SerializeField]
+        private float jumpForce = 5.0f;
+
+        [Header("Stamina / Dash (ASHFALL)")]
+        [SerializeField] private float staminaMax = 100f;
+        [SerializeField] private float staminaRegenPerSecond = 25f;       // regen cuando NO esprintas
+        [SerializeField] private float staminaSprintDrainPerSecond = 18f; // drena al esprintar
+        [Tooltip("Envion del dash (Alt izquierdo)."), SerializeField] private float dashSpeed = 20f;
+        [SerializeField] private float dashDuration = 0.18f;
+        [SerializeField] private float dashCost = 35f;
+
         #endregion
 
         #region PROPERTIES
@@ -40,6 +52,10 @@ namespace InfimaGames.LowPolyShooterPack
             //Setter.
             set => rigidBody.linearVelocity = value;
         }
+
+        // Para el HUD (ASHFALL): stamina 0..1 y si esta dasheando.
+        public float Stamina01 => staminaMax > 0f ? Mathf.Clamp01(stamina / staminaMax) : 0f;
+        public bool IsDashing => dashTimer > 0f;
 
         #endregion
 
@@ -62,6 +78,16 @@ namespace InfimaGames.LowPolyShooterPack
         /// True if the character is currently grounded.
         /// </summary>
         private bool grounded;
+
+        // Salto (ASHFALL): se encola al presionar y se consume en FixedUpdate.
+        private bool jumpQueued;
+        private InputAction jumpAction;
+
+        // Stamina / Dash (ASHFALL).
+        private float stamina;
+        private float dashTimer;
+        private Vector3 dashDir;
+        private ShooterDem.PlayerHealth playerHealth;   // para i-frames durante el dash
 
         /// <summary>
         /// Player Character.
@@ -103,6 +129,15 @@ namespace InfimaGames.LowPolyShooterPack
             audioSource = GetComponent<AudioSource>();
             audioSource.clip = audioClipWalking;
             audioSource.loop = true;
+
+            //Salto (ASHFALL): gravedad activa + cache de la accion "Jump" del PlayerInput.
+            rigidBody.useGravity = true;
+            var playerInput = GetComponent<PlayerInput>();
+            if (playerInput != null) jumpAction = playerInput.actions.FindAction("Jump");
+
+            //Stamina / Dash (ASHFALL).
+            stamina = staminaMax;
+            playerHealth = GetComponent<ShooterDem.PlayerHealth>();
         }
 
         /// Checks if the character is on the ground.
@@ -148,6 +183,32 @@ namespace InfimaGames.LowPolyShooterPack
             
             //Play Sounds!
             PlayFootstepSounds();
+
+            //Salto (ASHFALL): detectar el press aqui; se aplica en FixedUpdate.
+            if (jumpAction != null && jumpAction.WasPressedThisFrame())
+                jumpQueued = true;
+
+            //Dash (ASHFALL): Alt izquierdo, si hay stamina y no esta dasheando ya.
+            var kb = Keyboard.current;
+            if (dashTimer <= 0f && kb != null && kb.leftAltKey.wasPressedThisFrame && stamina >= dashCost)
+            {
+                Vector2 mv = playerCharacter.GetInputMovement();
+                Vector3 dir = new Vector3(mv.x, 0f, mv.y);
+                dashDir = dir.sqrMagnitude > 0.01f
+                    ? transform.TransformDirection(dir.normalized)
+                    : transform.forward;
+                dashTimer = dashDuration;
+                stamina -= dashCost;
+            }
+            //Timer del dash + i-frames mientras dura.
+            if (dashTimer > 0f) dashTimer -= Time.deltaTime;
+            if (playerHealth != null) playerHealth.Invulnerable = IsDashing;
+
+            //Stamina: drena al esprintar moviendose; regenera si no.
+            bool sprintingNow = playerCharacter.IsRunning() && !IsDashing
+                                && rigidBody.linearVelocity.sqrMagnitude > 0.1f;
+            stamina += (sprintingNow ? -staminaSprintDrainPerSecond : staminaRegenPerSecond) * Time.deltaTime;
+            stamina = Mathf.Clamp(stamina, 0f, staminaMax);
         }
 
         #endregion
@@ -163,8 +224,8 @@ namespace InfimaGames.LowPolyShooterPack
             //Calculate local-space direction by using the player's input.
             var movement = new Vector3(frameInput.x, 0.0f, frameInput.y);
             
-            //Running speed calculation.
-            if(playerCharacter.IsRunning())
+            //Running speed calculation. (ASHFALL) Solo esprinta si queda stamina.
+            if(playerCharacter.IsRunning() && stamina > 0f)
                 movement *= speedRunning;
             else
             {
@@ -177,8 +238,19 @@ namespace InfimaGames.LowPolyShooterPack
 
             #endregion
             
-            //Update Velocity.
-            Velocity = new Vector3(movement.x, 0.0f, movement.z);
+            //Update Velocity. (ASHFALL) Preservamos la Y para que funcione la gravedad/salto
+            //(antes la anulaba a 0 -> el player flotaba pegado al piso, sin saltar ni caer).
+            float yVel = rigidBody.linearVelocity.y;
+            if (jumpQueued && grounded)
+            {
+                yVel = jumpForce;
+                jumpQueued = false;
+            }
+            //Dash (ASHFALL): durante el dash, velocidad fija en la direccion del dash.
+            if (IsDashing)
+                Velocity = new Vector3(dashDir.x * dashSpeed, yVel, dashDir.z * dashSpeed);
+            else
+                Velocity = new Vector3(movement.x, yVel, movement.z);
         }
 
         /// <summary>

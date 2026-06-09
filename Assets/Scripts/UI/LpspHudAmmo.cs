@@ -14,6 +14,7 @@ namespace ShooterDem
         private HudController hud;
         private CharacterBehaviour character;
         private WeaponBehaviour lastWeapon;
+        private Movement movement;   // para la stamina (sprint/dash)
 
         void Start()
         {
@@ -32,6 +33,10 @@ namespace ShooterDem
         {
             if (hud == null) return;
             if (character == null) { TryGetCharacter(); if (character == null) return; }
+
+            // Stamina (sprint/dash) -> barra del HUD.
+            if (movement == null) movement = character.GetComponent<Movement>();
+            if (movement != null) hud.SetStamina01(movement.Stamina01);
 
             var inventory = character.GetInventory();
             var weapon = inventory != null ? inventory.GetEquipped() : null;

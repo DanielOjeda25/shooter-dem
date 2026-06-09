@@ -25,6 +25,7 @@ public class HudController : MonoBehaviour
     private bool hitmarkerArmed;           // un solo tic por disparo (la escopeta golpea N veces)
 
     private Label healthValue, ammoValue, weaponName, waveValue;
+    private VisualElement staminaFill;   // barra de stamina (sprint/dash)
     private CrosshairArcs crosshair;   // arcos del reticle (vida/escudo/cargador/reserva)
     private DamageVignette vignette;   // bordes rojos al recibir dano / vida baja
     private Camera cam;                // para calcular la direccion del dano (cacheada)
@@ -96,14 +97,17 @@ public class HudController : MonoBehaviour
         ammoValue = root.Q<Label>("ammo-value");
         weaponName = root.Q<Label>("weapon-name");
         waveValue = root.Q<Label>("wave-value");
+        staminaFill = root.Q<VisualElement>("stamina-fill");
 
         // Vineta de dano: overlay DETRAS del texto del HUD (Insert(0)).
         vignette = new DamageVignette();
         root.Insert(0, vignette);
 
-        // Reticle con arcos: lo creamos por codigo y lo anadimos como overlay (encima).
+        // Reticle con arcos: creamos el objeto (para que los setters null-safe funcionen)
+        // pero NO lo añadimos al HUD: usamos la mira animada del pack y los arcos cruzaban.
+        // (la vida se ve en la caja SALUD; la stamina tendra su propio indicador mas adelante)
         crosshair = new CrosshairArcs();
-        root.Add(crosshair);
+        // root.Add(crosshair);   // (desactivado) -> mira del pack en el centro
         // El arco superior-izquierdo (antes "escudo") muestra la STAMINA (sprint/dash).
         playerMovement = playerHealth != null ? playerHealth.GetComponent<PlayerMovement>() : null;
         crosshair.Shield = playerMovement != null ? playerMovement.Stamina01 : 1f;
@@ -177,6 +181,13 @@ public class HudController : MonoBehaviour
     public void SetWeaponNameExternal(string name)
     {
         if (weaponName != null) weaponName.text = name;
+    }
+
+    // Stamina (0..1) desde fuente externa (el Movement del pack), via LpspHudAmmo.
+    public void SetStamina01(float value)
+    {
+        if (staminaFill != null)
+            staminaFill.style.width = Length.Percent(Mathf.Clamp01(value) * 100f);
     }
 
     void OnWaveChanged(int wave) => RefreshWave();

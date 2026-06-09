@@ -33,9 +33,12 @@ public class PlayerHealth : Health
     void OnDisable() { if (Current == this) Current = null; }
 
     // i-frames mientras dashea: esquivar de verdad evita el dano.
+    // Con nuestro PlayerMovement (arsenal viejo) la invuln viene de su dash.
+    // Con el player del pack (sin PlayerMovement), la maneja el dash del Movement del
+    // pack directamente (setea Invulnerable) -> NO la pisamos aca.
     void Update()
     {
-        Invulnerable = movement != null && movement.IsDashing;
+        if (movement != null) Invulnerable = movement.IsDashing;
     }
 
     protected override void OnDeath()
