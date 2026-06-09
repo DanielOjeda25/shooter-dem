@@ -22,7 +22,10 @@ public class HudController : MonoBehaviour
     [Header("Hitmarker")]
     public AudioClip hitmarkerClip;        // tic 2D al confirmar impacto en un enemigo
     private AudioSource hitAudio;          // fuente 2D (se crea sola en Start)
-    private bool hitmarkerArmed;           // un solo tic por disparo (la escopeta golpea N veces)
+    // Anti-spam del tic por TIEMPO (antes era un flag re-armado por weapon.Fired, pero el
+    // arma del pack no dispara ese evento): N impactos casi simultaneos = 1 solo tic.
+    private float lastHitmarkerTime;
+    const float HitmarkerSoundCooldown = 0.08f;
 
     private Label healthValue, ammoValue, weaponName, waveValue;
     private VisualElement staminaFill;   // barra de stamina (sprint/dash)
@@ -40,6 +43,8 @@ public class HudController : MonoBehaviour
         if (waveSystem != null) waveSystem.WaveChanged += OnWaveChanged;
         if (weaponManager != null) weaponManager.WeaponSwitched += OnWeaponSwitched;
         if (playerHealth != null) playerHealth.Hit += OnPlayerHit;
+        // Balas del pack (Camino A): bus estatico, no necesita referencia en el Inspector.
+        LpspBulletDamage.HitConfirmed += OnHitConfirmed;
     }
 
     void OnDisable()
@@ -51,6 +56,7 @@ public class HudController : MonoBehaviour
         if (waveSystem != null) waveSystem.WaveChanged -= OnWaveChanged;
         if (weaponManager != null) weaponManager.WeaponSwitched -= OnWeaponSwitched;
         if (playerHealth != null) playerHealth.Hit -= OnPlayerHit;
+        LpspBulletDamage.HitConfirmed -= OnHitConfirmed;
     }
 
     // Al recibir dano: arco rojo apuntando al origen + sacudida de camara.
@@ -71,20 +77,25 @@ public class HudController : MonoBehaviour
     void OnFired()
     {
         if (crosshair != null) crosshair.Kick();   // los arcos se "abren" al disparar
-        hitmarkerArmed = true;   // re-arma el tic: Fired ocurre ANTES que los Hit del disparo
     }
 
-    // Disparo confirmado sobre un enemigo: X en la mira + tic 2D (feedback del jugador).
-    // La X visual puede repetirse sin coste; el SONIDO suena UNA vez por disparo (si no,
-    // la escopeta encimaria 8 tics y saturaria).
+    // Camino legado (Weapon por raycast): delega en el mismo confirmador.
     void OnWeaponHit(RaycastHit hit, bool hitDamageable)
     {
-        if (!hitDamageable) return;
+        if (hitDamageable) OnHitConfirmed();
+    }
+
+    // Impacto confirmado sobre un enemigo (cualquier camino: raycast legado o bala del
+    // pack): X en la mira + tic 2D. La X puede repetirse sin coste; el SONIDO respeta un
+    // cooldown corto (varios perdigones/balas casi simultaneos = 1 tic, no una rafaga).
+    void OnHitConfirmed()
+    {
         if (crosshair != null) crosshair.Hitmarker();
-        if (hitmarkerArmed && hitmarkerClip != null && hitAudio != null)
+        if (hitmarkerClip != null && hitAudio != null
+            && Time.time >= lastHitmarkerTime + HitmarkerSoundCooldown)
         {
             hitAudio.PlayOneShot(hitmarkerClip);
-            hitmarkerArmed = false;   // ya sono para este disparo
+            lastHitmarkerTime = Time.time;
         }
     }
 

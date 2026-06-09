@@ -11,6 +11,10 @@ namespace ShooterDem
     /// </summary>
     public class LpspBulletDamage : MonoBehaviour
     {
+        // Bus estatico (como EnemyHealth.Killed): "una bala daño a un enemigo".
+        // Lo escucha el HUD para el hitmarker (X + tic) sin cablear nada en el Inspector.
+        public static event System.Action HitConfirmed;
+
         [Header("Daño")]
         public int damage = 25;
 
@@ -34,6 +38,7 @@ namespace ShooterDem
                 return;   // no es enemigo: las superficies las maneja el Projectile del pack
 
             damageable.TakeDamage(damage);
+            HitConfirmed?.Invoke();   // avisa al HUD: hitmarker (X + tic)
 
             // Punto/normal del impacto para orientar el efecto.
             var contact = collision.GetContact(0);
