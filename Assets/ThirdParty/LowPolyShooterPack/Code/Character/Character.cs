@@ -613,7 +613,14 @@ namespace InfimaGames.LowPolyShooterPack
 			//Block.
 			if (!CanPlayAnimationReload())
 				return;
-			
+
+			//ASHFALL: no recargar si el cargador ya esta lleno (evita re-ejecutar la recarga).
+			{
+				var eq = inventory != null ? inventory.GetEquipped() : null;
+				if (eq != null && eq.GetAmmunitionCurrent() >= eq.GetAmmunitionTotal())
+					return;
+			}
+
 			//Switch.
 			switch (context)
 			{

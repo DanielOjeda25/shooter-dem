@@ -40,13 +40,22 @@ namespace ShooterDem
             // Munición: current / capacidad del cargador.
             hud.SetAmmoExternal(weapon.GetAmmunitionCurrent(), weapon.GetAmmunitionTotal());
 
-            // Nombre del arma: solo cuando cambia (limpiamos el prefijo del prefab).
+            // Nombre del arma: solo cuando cambia.
             if (weapon != lastWeapon)
             {
                 lastWeapon = weapon;
-                string n = weapon.name.Replace("P_LPSP_WEP_", "").Replace("(Clone)", "").Trim();
-                hud.SetWeaponNameExternal(n);
+                hud.SetWeaponNameExternal(FriendlyName(weapon.name));
             }
+        }
+
+        // Nombre lindo a partir del nombre del prefab del arma.
+        private static string FriendlyName(string raw)
+        {
+            string n = raw.Replace("P_LPSP_WEP_", "").Replace("(Clone)", "").Trim();
+            n = System.Text.RegularExpressions.Regex.Replace(n, "_\\d+$", ""); // quita "_03"
+            if (n.Contains("Handgun")) return "Pistola";
+            if (n.StartsWith("AR") || n.Contains("Rifle")) return "Rifle";
+            return n;
         }
     }
 }

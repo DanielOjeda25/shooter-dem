@@ -160,7 +160,7 @@ public class CrosshairArcs : VisualElement
             DrawStat(p, c, OuterRadius, 0f, dReserve);   // reserva
         }
 
-        DrawReticle(p, c);    // mira central segun el arma (siempre visible)
+        // DrawReticle(p, c);   // (desactivado) usamos la mira animada del pack en el centro
         DrawDamage(p, c);     // indicadores direccionales de dano (si los hay)
         DrawHitmarker(p, c);  // X breve al confirmar impacto en enemigo
     }
