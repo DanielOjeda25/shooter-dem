@@ -69,7 +69,9 @@ public class ExplosiveBarrelScript : MonoBehaviour {
 			Rigidbody rb = hit.GetComponent<Rigidbody> ();
 
 			//Add force to nearby rigidbodies
-			if (rb != null)
+			//ASHFALL: al JUGADOR no le aplicamos la fuerza bruta (recibe el knockback controlado mas
+			//abajo). Si se la aplicaramos, se sumaria al knockback y lo mandaria fuera del mapa.
+			if (rb != null && rb.GetComponent<InfimaGames.LowPolyShooterPack.Movement>() == null)
 				rb.AddExplosionForce (explosionForce * 50, explosionPos, explosionRadius, explosionUpwardsModifier);
 
 			//ASHFALL: dano por explosion a enemigos Y jugador (ambos son IDamageable), con caida por distancia.
