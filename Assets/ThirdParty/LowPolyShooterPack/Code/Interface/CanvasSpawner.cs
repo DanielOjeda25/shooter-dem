@@ -26,6 +26,11 @@ namespace InfimaGames.LowPolyShooterPack.Interface
         /// </summary>
         private void Awake()
         {
+            //ASHFALL: respetar el tilde del componente (Awake corre aunque este desactivado;
+            //sin esto era imposible apagar la UI del pack desde el Inspector).
+            if (!enabled)
+                return;
+
             //Spawn Interface.
             Instantiate(canvasPrefab);
         }

@@ -32,14 +32,20 @@ namespace ShooterDem
 
         public void Apply()
         {
-            if (playerInput == null) return;
-            foreach (var name in WeaponActions)
+            if (playerInput != null)
             {
-                var action = playerInput.actions.FindAction(name);
-                if (action == null) continue;
-                if (unarmed) action.Disable();
-                else action.Enable();
+                foreach (var name in WeaponActions)
+                {
+                    var action = playerInput.actions.FindAction(name);
+                    if (action == null) continue;
+                    if (unarmed) action.Disable();
+                    else action.Enable();
+                }
             }
+
+            // HUD: sin arma no hay caja de municion.
+            var hud = FindFirstObjectByType<HudController>();
+            if (hud != null) hud.SetAmmoPanelVisible(!unarmed);
         }
     }
 }

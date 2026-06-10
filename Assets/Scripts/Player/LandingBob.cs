@@ -28,8 +28,9 @@ namespace ShooterDem
         [Header("Bob al moverse (procedural — caminar/correr)")]
         [Tooltip("Amplitud del bamboleo a velocidad de CORRER (m).")]
         public float bobRunAmount = 0.035f;
-        [Tooltip("Zancadas por segundo a velocidad de correr.")]
-        public float bobRunFrequency = 2.6f;
+        [Tooltip("Ciclos de balanceo por segundo a velocidad de correr. 1.5 = sincronizado " +
+                 "con el ciclo de brazos del run (16f @24fps): 2 pisadas por ciclo = 3 pasos/s.")]
+        public float bobRunFrequency = 1.5f;
         [Tooltip("Velocidad (m/s) considerada 'correr a fondo' (escala amplitud y ritmo).")]
         public float runSpeedReference = 6.8f;
         [Tooltip("Vaiven lateral como fraccion del vertical.")]

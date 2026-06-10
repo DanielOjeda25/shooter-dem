@@ -29,6 +29,7 @@ public class HudController : MonoBehaviour
 
     private Label healthValue, ammoValue, weaponName, waveValue;
     private VisualElement staminaFill;   // barra de stamina (sprint/dash)
+    private VisualElement ammoPanel;     // caja de municion (se oculta en modo desarmado)
     private CrosshairArcs crosshair;   // arcos del reticle (vida/escudo/cargador/reserva)
     private DamageVignette vignette;   // bordes rojos al recibir dano / vida baja
     private Camera cam;                // para calcular la direccion del dano (cacheada)
@@ -109,6 +110,10 @@ public class HudController : MonoBehaviour
         weaponName = root.Q<Label>("weapon-name");
         waveValue = root.Q<Label>("wave-value");
         staminaFill = root.Q<VisualElement>("stamina-fill");
+        ammoPanel = root.Q<VisualElement>("ammo-panel");
+        // Estado inicial segun el modo desarmado (independiente del orden de Start).
+        var unarmedMode = FindFirstObjectByType<UnarmedMode>();
+        if (unarmedMode != null) SetAmmoPanelVisible(!unarmedMode.unarmed);
 
         // Vineta de dano: overlay DETRAS del texto del HUD (Insert(0)).
         vignette = new DamageVignette();
@@ -191,6 +196,13 @@ public class HudController : MonoBehaviour
     public void SetWeaponNameExternal(string name)
     {
         if (weaponName != null) weaponName.text = name;
+    }
+
+    // Mostrar/ocultar la caja de municion (modo desarmado: jugando con las manos).
+    public void SetAmmoPanelVisible(bool visible)
+    {
+        if (ammoPanel != null)
+            ammoPanel.style.display = visible ? DisplayStyle.Flex : DisplayStyle.None;
     }
 
     // Stamina (0..1) desde fuente externa (el Movement del pack), via LpspHudAmmo.
