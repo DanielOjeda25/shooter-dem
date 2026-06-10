@@ -4908,11 +4908,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a45ce6821f352394f845189372809b7a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ShooterDem.LandingBob
-  maxDip: 0.12
+  maxDip: 0.18
   minImpactSpeed: 3
-  maxImpactSpeed: 16
-  spring: 140
-  damping: 14
+  maxImpactSpeed: 10
+  spring: 90
+  damping: 9
   bobRunAmount: 0.035
   stepsPerSecond: 4.3499784
   blendStartSpeed: 4.3

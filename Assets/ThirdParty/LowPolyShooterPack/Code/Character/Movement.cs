@@ -177,42 +177,32 @@ namespace InfimaGames.LowPolyShooterPack
             playerHealth = GetComponent<ShooterDem.PlayerHealth>();
         }
 
-        /// Checks if the character is on the ground.
-        private void OnCollisionStay()
+        //ASHFALL: grounded DETERMINISTICO (reemplaza el OnCollisionStay original del pack).
+        //El sistema por contactos fallaba dos veces: (1) rozar PAREDES contaba como piso;
+        //(2) saltar rozando una RAMPA (normal hacia arriba = "piso legitimo") mantenia
+        //grounded=true durante TODO el ascenso -> stamina drenando y bob "corriendo" en el
+        //aire (confirmado con instrumentacion: 'Ramp_SO' vy=+2.2 grounded=True).
+        //Regla nueva: piso = spherecast ANGOSTO bajo los PIES + NO estar subiendo.
+        private bool CheckGrounded()
         {
-            //Bounds.
-            Bounds bounds = capsule.bounds;
-            //Extents.
-            Vector3 extents = bounds.extents;
-            //Radius.
-            float radius = extents.x - 0.01f;
-            
-            //Cast. This checks whether there is indeed ground, or not.
-            Physics.SphereCastNonAlloc(bounds.center, radius, Vector3.down,
-                groundHits, extents.y - radius * 0.5f, ~0, QueryTriggerInteraction.Ignore);
+            if (rigidBody.linearVelocity.y > 0.5f)
+                return false;                       // subiendo en un salto: jamas es piso
 
-            //ASHFALL: solo cuenta como piso una superficie HORIZONTAL (normal hacia arriba).
-            //El check original aceptaba CUALQUIER contacto: rozar una pared en el aire
-            //marcaba grounded=true (stamina drenando y bob "corriendo" en el aire).
-            if (!groundHits.Any(hit => hit.collider != null && hit.collider != capsule
-                                       && hit.normal.y > 0.6f))
-                return;
-
-            //Store RaycastHits.
-            for (var i = 0; i < groundHits.Length; i++)
-                groundHits[i] = new RaycastHit();
-
-            //Set grounded. Now we know for sure that we're grounded.
-            grounded = true;
+            Bounds b = capsule.bounds;
+            float r = capsule.radius * 0.5f;        // angosto: los roces laterales no cuentan
+            float dist = b.extents.y - r + 0.08f;   // la esfera llega hasta apenas bajo los pies
+            return Physics.SphereCast(b.center, r, Vector3.down, out RaycastHit hit, dist,
+                                      ~(1 << gameObject.layer), QueryTriggerInteraction.Ignore)
+                   && hit.normal.y > 0.6f;          // y la superficie debe ser horizontal
         }
 			
         protected override void FixedUpdate()
         {
+            //ASHFALL: piso calculado cada paso de fisica (ya no depende de colisiones).
+            grounded = CheckGrounded();
+
             //Move.
             MoveCharacter();
-            
-            //Unground.
-            grounded = false;
         }
 
         /// Moves the camera to the character, processes jumping and plays sounds every frame.
@@ -269,12 +259,14 @@ namespace InfimaGames.LowPolyShooterPack
             if (dashTimer > 0f) dashTimer -= Time.deltaTime;
             if (playerHealth != null) playerHealth.Invulnerable = IsDashing;
 
-            //Stamina: drena al esprintar moviendose EN EL PISO; regenera si no.
-            //(en el aire no se esprinta: ni drena stamina ni se siente "correr en el aire")
+            //Stamina: drena al esprintar moviendose EN EL PISO; regenera SOLO en el piso.
+            //En el aire se CONGELA (ni drena ni regenera): la instrumentacion mostro que
+            //regenerar en el aire hacia imposible vaciarla (saltar+correr = sprint infinito).
             bool sprintingNow = playerCharacter.IsRunning() && !IsDashing && grounded
                                 && rigidBody.linearVelocity.sqrMagnitude > 0.1f;
-            stamina += (sprintingNow ? -staminaSprintDrainPerSecond : staminaRegenPerSecond) * Time.deltaTime;
-            stamina = Mathf.Clamp(stamina, 0f, staminaMax);
+            float staminaDelta = sprintingNow ? -staminaSprintDrainPerSecond
+                                : (grounded ? staminaRegenPerSecond : 0f);
+            stamina = Mathf.Clamp(stamina + staminaDelta * Time.deltaTime, 0f, staminaMax);
         }
 
         #endregion
