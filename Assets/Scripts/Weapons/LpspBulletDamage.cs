@@ -32,18 +32,24 @@ namespace ShooterDem
 
         private void OnCollisionEnter(Collision collision)
         {
-            // El colisionador golpeado puede estar en un hijo; buscamos hacia el padre.
-            var damageable = collision.collider.GetComponentInParent<IDamageable>();
-            if (damageable == null)
-                return;   // no es enemigo: las superficies las maneja el Projectile del pack
-
-            damageable.TakeDamage(damage);
-            HitConfirmed?.Invoke();   // avisa al HUD: hitmarker (X + tic)
-
             // Punto/normal del impacto para orientar el efecto.
             var contact = collision.GetContact(0);
             Vector3 pos = contact.point;
             Vector3 normal = contact.normal;
+
+            // El colisionador golpeado puede estar en un hijo; buscamos hacia el padre.
+            var damageable = collision.collider.GetComponentInParent<IDamageable>();
+            if (damageable == null)
+            {
+                // Superficie (muro/suelo): agujero de bala persistente (pool con tope).
+                if (BulletDecalManager.Instance != null)
+                    BulletDecalManager.Instance.Spawn(pos, normal);
+                return;
+            }
+
+            damageable.TakeDamage(damage);
+            HitConfirmed?.Invoke();   // avisa al HUD: hitmarker (X + tic)
+
             Quaternion rot = normal.sqrMagnitude > 0.0001f
                 ? Quaternion.LookRotation(normal)
                 : Quaternion.identity;
@@ -62,11 +68,25 @@ namespace ShooterDem
                 if (clip != null) PooledSfx.Play(sfxPrefab, clip, pos, sfxVolume);
             }
 
-            // 3) Mancha de sangre persistente en el suelo bajo el impacto.
-            if (spawnFloorDecal && BloodDecalManager.Instance != null
-                && Physics.Raycast(pos, Vector3.down, out var ground, 5f))
+            // 3) Mancha de sangre persistente en el SUELO bajo el impacto.
+            // OJO: el rayo hacia abajo sale del punto de impacto (el pecho del enemigo),
+            // asi que hay que IGNORAR los colliders del PROPIO enemigo (si no, la mancha
+            // quedaba pegada al cuerpo y "flotando" en el aire al morir el bicho —
+            // especialmente en el tanque, que es alto y ancho). Tambien exigimos que la
+            // superficie sea horizontal (normal hacia arriba): es una mancha de SUELO.
+            if (spawnFloorDecal && BloodDecalManager.Instance != null)
             {
-                BloodDecalManager.Instance.Spawn(ground.point, ground.normal);
+                Transform enemyRoot = (damageable as Component)?.transform.root;
+                var hits = Physics.RaycastAll(pos, Vector3.down, 6f);
+                System.Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
+                foreach (var h in hits)
+                {
+                    if (enemyRoot != null && h.collider.transform.root == enemyRoot)
+                        continue;                  // su propio cuerpo: seguir bajando
+                    if (h.normal.y < 0.5f) break;  // pared/objeto vertical: no es suelo
+                    BloodDecalManager.Instance.Spawn(h.point, h.normal);
+                    break;
+                }
             }
         }
     }
