@@ -18,12 +18,18 @@ namespace ShooterDem
         private Rigidbody body;
         private float speed;
         private static readonly int SpeedHash = Animator.StringToHash("Speed");
+        private static readonly int ClimbHash = Animator.StringToHash("Climb");
 
         void Awake()
         {
             animator = GetComponent<Animator>();
             body = GetComponentInParent<Rigidbody>();
         }
+
+        // Trepado: el sistema (LedgeClimb) avisa por bus estatico -> disparamos la anim.
+        void OnEnable()  { LedgeClimb.ClimbStarted += OnClimb; }
+        void OnDisable() { LedgeClimb.ClimbStarted -= OnClimb; }
+        void OnClimb()   { animator.SetTrigger(ClimbHash); }
 
         void Update()
         {

@@ -104,6 +104,15 @@ namespace InfimaGames.LowPolyShooterPack
         // Knockback (ASHFALL): mientras dura, MoveCharacter cede el control a la fisica.
         private float knockbackTimer;
 
+        // Suspension (ASHFALL): el trepado de bordes toma el control TOTAL del movimiento
+        // (LedgeClimb mueve el transform a mano). Al suspender se cancela el salto en cola.
+        private bool suspended;
+        public bool Suspended
+        {
+            get => suspended;
+            set { suspended = value; if (value) jumpQueued = false; }
+        }
+
         /// <summary>
         /// ASHFALL: empuja al player con una velocidad dada y le quita el control del movimiento
         /// por 'duration' segundos (para explosiones de barril -> vuelo + caida real).
@@ -204,8 +213,9 @@ namespace InfimaGames.LowPolyShooterPack
         /// Moves the camera to the character, processes jumping and plays sounds every frame.
         protected override  void Update()
         {
-            //ASHFALL: congelado (pausa / game over) -> cortar pasos y no procesar salto/dash.
-            if (Time.timeScale <= 0f)
+            //ASHFALL: congelado (pausa / game over) o suspendido (trepando un borde)
+            //-> cortar pasos y no procesar salto/dash.
+            if (Time.timeScale <= 0f || suspended)
             {
                 if (audioSource != null && audioSource.isPlaying) audioSource.Pause();
                 return;
@@ -267,6 +277,10 @@ namespace InfimaGames.LowPolyShooterPack
 
         private void MoveCharacter()
         {
+            //ASHFALL: trepando un borde, el LedgeClimb mueve el transform (rigidbody kinematico).
+            if (suspended)
+                return;
+
             //ASHFALL: durante el knockback (explosion) la FISICA manda -> no pisamos la velocidad,
             //asi el empujon (arriba + atras) y la gravedad se sienten de verdad (vuelo + caida).
             if (knockbackTimer > 0f)

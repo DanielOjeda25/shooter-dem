@@ -75,6 +75,8 @@ namespace ShooterDem
                 movement.StaminaDenied += OnNoStamina;
             }
             LandingBob.Landed += OnLand;   // bus estatico (la camara detecta el aterrizaje)
+            // Trepar un borde = esfuerzo similar al salto -> reusa los grunidos de salto.
+            LedgeClimb.ClimbStarted += OnJump;
         }
 
         void OnDisable()
@@ -91,6 +93,7 @@ namespace ShooterDem
                 movement.StaminaDenied -= OnNoStamina;
             }
             LandingBob.Landed -= OnLand;
+            LedgeClimb.ClimbStarted -= OnJump;
             if (heartbeatSource != null) heartbeatSource.Stop();
         }
 

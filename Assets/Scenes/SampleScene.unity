@@ -2725,6 +2725,25 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ShooterDem.UnarmedMode
   unarmed: 1
+--- !u!114 &924380284
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 924380248}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 897b32c7db5d3ab43962aa747300eb35, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ShooterDem.LedgeClimb
+  maxGrabDistance: 0.9
+  minLedgeHeight: 0.9
+  maxLedgeHeight: 2.4
+  climbMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  climbDuration: 0.55
 --- !u!1 &927565392
 GameObject:
   m_ObjectHideFlags: 0
@@ -3519,7 +3538,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2748913124992463393, guid: 19eadcf8fbed56b4da77ca94c1b4145f, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 1.1
+      value: -0.09500002
       objectReference: {fileID: 0}
     - target: {fileID: 2748913124992463393, guid: 19eadcf8fbed56b4da77ca94c1b4145f, type: 3}
       propertyPath: m_LocalPosition.z
@@ -3606,6 +3625,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 2751027687307977091, guid: 19eadcf8fbed56b4da77ca94c1b4145f, type: 3}
       insertIndex: -1
       addedObject: {fileID: 924380283}
+    - targetCorrespondingSourceObject: {fileID: 2751027687307977091, guid: 19eadcf8fbed56b4da77ca94c1b4145f, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 924380284}
     - targetCorrespondingSourceObject: {fileID: 56164245437412244, guid: 19eadcf8fbed56b4da77ca94c1b4145f, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1620379816}
@@ -4892,8 +4914,9 @@ MonoBehaviour:
   spring: 140
   damping: 14
   bobRunAmount: 0.035
-  bobRunFrequency: 2.6
-  runSpeedReference: 6.8
+  stepsPerSecond: 4.3499784
+  blendStartSpeed: 4.3
+  blendEndSpeed: 6.8
   swayFactor: 0.6
 --- !u!1 &1634328446
 GameObject:
