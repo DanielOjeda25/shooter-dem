@@ -56,13 +56,21 @@ namespace ShooterDem
         {
             EnemyHealth.Spawned += OnEnemySpawned;
             EnemyHealth.Killed += OnEnemyKilled;
+            GameManager.GameOverShown += OnGameOver;
         }
 
         void OnDisable()
         {
             EnemyHealth.Spawned -= OnEnemySpawned;
             EnemyHealth.Killed -= OnEnemyKilled;
+            GameManager.GameOverShown -= OnGameOver;
         }
+
+        // Fin de partida (victoria O derrota): la musica se apaga con fade. El crossfade
+        // de Update usa tiempo UNSCALED, asi que funciona aunque el game over congele el
+        // juego (timeScale 0). Sin esto, la pista de combate seguia sonando en la pantalla.
+        private bool gameOver;
+        void OnGameOver(string _) => gameOver = true;
 
         void Start()
         {
@@ -94,6 +102,7 @@ namespace ShooterDem
             float k = crossfadeTime > 0f ? Time.unscaledDeltaTime / crossfadeTime : 1f;
             float peaceTarget = combat ? 0f : musicVolume;
             float fightTarget = combat ? musicVolume : 0f;
+            if (gameOver) { peaceTarget = 0f; fightTarget = 0f; }   // fin de partida: silencio
             peaceSource.volume = Mathf.MoveTowards(peaceSource.volume, peaceTarget, k * musicVolume);
             fightSource.volume = Mathf.MoveTowards(fightSource.volume, fightTarget, k * musicVolume);
         }

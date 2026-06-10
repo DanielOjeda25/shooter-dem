@@ -265,7 +265,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 9a0c56bff4337414e84f5e6e8dfc4bb6, type: 2}
+  - {fileID: 2100000, guid: 5e88a93148f69984e968ecc92408960f, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -615,7 +615,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ShooterDem.MusicManager
   peaceClip: {fileID: 8300000, guid: cb4a4ecf25f9eab4b95c8b0a2d249e7d, type: 3}
-  fightClip: {fileID: 8300000, guid: e1800392e9eaa3c42ae2d329f4be3bd0, type: 3}
+  fightClip: {fileID: 8300000, guid: e79a0ba3a1486e44e943f4867d98abff, type: 3}
   stingerClip: {fileID: 0}
   musicVolume: 0.6
   crossfadeTime: 1.5
