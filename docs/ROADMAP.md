@@ -247,13 +247,13 @@ Setup de Blender MCP en `docs/BLENDER_MCP_SETUP.md`; quirks del pipeline en la m
   de la anim 4.35/s; amplitud = peso del blend) + golpe de aterrizaje con recuperación
   (`LandingBob`). **Dash DESACTIVADO** por diseño (`dashEnabled=false`; el código queda).
 
-**🐞 BUG ABIERTO (debug pendiente):** tras saltar desde plataformas (especialmente pegado a
-muros del trepado), el juego sigue creyendo que el player está en el piso: **stamina drena con
-Shift en el aire y el bob "corre" en el aire**. Ya intentado: grounded del pack filtrado por
-normal (`normal.y > 0.6`), bob unificado a `Movement.Grounded`, corte rápido de amplitud al
-despegar. **Persiste** → próxima sesión: instrumentar en vivo (loggear grounded/velocity/bobAmp
-por frame durante la secuencia exacta) en lugar de teorizar.
+**✅ BUG RESUELTO (con instrumentacion en vivo):** el "piso fantasma" tenia DOS raices,
+halladas con un logger temporal (147 muestras): (1) el grounded por colisiones del pack
+contaba RAMPAS rozadas en pleno salto como piso; (2) la stamina REGENERABA EN EL AIRE
+(saltar+correr = sprint infinito, nunca llegaba a 0). Fix: grounded deterministico por
+FixedUpdate (spherecast angosto bajo los pies + normal horizontal + no estar subiendo)
+y stamina congelada en el aire. Leccion de metodo: medir > teorizar.
 
-**Siguiente:** debug del grounded → anim de **disparo** (AR_X montado en el rig de Hozq) →
+**Siguiente:** anim de **disparo** (AR_X montado en el rig de Hozq) →
 modelos de enemigos (concepto "El Calcinado" listo para Gemini) → **La Fundición Fase 1: el Atrio**
 (diseño completo en `docs/MAPA_FUNDICION.md`).
