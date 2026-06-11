@@ -52,14 +52,38 @@
 
 ---
 
+## 🎵 Música por mapa — `MapAudio` (ScriptableObject, data-driven)
+
+Cada mapa tiene su **`MapAudio`** (Create > Shooter > Map Audio) con `peace`, `fight`,
+`stinger`, `ambientLoop`, `ambientVolume`. Se arrastra al campo **`mapAudio`** del
+`MusicManager`; cambiar la música de un mapa = editar/cambiar ese asset, sin tocar escena.
+- **Convención**: `ambience-{N}-peace.ogg` / `ambience-{N}-fight.ogg` (mismo tema = mismo N).
+- Assets hechos: **`Map_Ambience1`** (tema 1, el actual) y **`Map_Ambience2`** (tema 2).
+- El `MusicManager` reproduce además el `ambientLoop` como capa de fondo continua (ajena al
+  crossfade de combate; se calla solo en game over).
+
+## ✅ Nuevo (esta sesión)
+
+| Sonido | Enganche |
+|---|---|
+| **Pasos** (discretos `step1/step2`) | `PlayerAudio` (cadencia por estado; reemplaza el loop del pack) |
+| **Agacharse** (`crouch`) | `PlayerAudio` (al entrar en `Movement.IsCrouching`) |
+| **Agarrar objeto** (`grab`+`grab-1`) | `PhysicsCarry.Grabbed` → `PlayerAudio` |
+| **Cambio de arma** (`changeGun`) | `WeaponSwitch` (al cambiar slot) |
+
 ## ❌ Lo que FALTA
 
 | Sonido | Dónde engancha | Prioridad |
 |---|---|---|
-| Stinger de transición de música | `MusicManager.stingerClip` (solo falta el clip) | 🎵⚪ |
-| Agacharse / levantarse | `Movement` del pack | ⚪ |
-| Pasos por superficie (ceniza/metal) | sistema de pasos | ⚪ |
-| Ambiente de fondo (viento/ceniza) además de la música | loop 2D aparte | ⚪ |
+| **Arrojar objeto** | `PhysicsCarry.Thrown` → `PlayerAudio.throwClips` (campo listo, falta clip) | 🟡 |
+| Stinger de transición de música | `MapAudio.stinger` (solo falta el clip) | 🎵⚪ |
+| Ambiente de fondo (viento/ceniza) | `MapAudio.ambientLoop` (cuando exista el mapa) | ⚪ |
+
+### ⏸️ Pistola — esperan el SISTEMA DE DISPARO (la pistola aún no tira balas)
+Clips ya en `Audio/Weapons/Pistol/`, listos para cablear cuando exista el tiro:
+**fire1/2** + **fire_distant1/2** (disparo) · **dryfire** (sin munición) · **mag_in/out**,
+**slide** (partes de recarga, para sincronizar por animation-events más adelante).
+> Recarga (`reload1/2/3`) y cambio de arma/desenfundar (`changeGun`) ✅ ya cableados.
 
 > **Decisiones del autor (jun 2026):** el audio del **ranged** queda cubierto con
 > `ranged.wav` (variante de disparo) — sin sonido extra de proyectil. **No habrá** jingles

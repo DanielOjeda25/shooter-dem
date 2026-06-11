@@ -43,7 +43,9 @@ namespace ShooterDem
         [Tooltip("Sacudida de camara al arrojar (kick del esfuerzo).")]
         public float throwShake = 0.25f;
 
-        // Bus estatico: "arrojo el objeto" (anim de empuje del viewmodel + extras).
+        // Buses estaticos: "agarro" / "arrojo el objeto" (los escucha PlayerAudio para el
+        // sonido + el viewmodel para la anim de empuje). Sin cableado de Inspector.
+        public static event System.Action Grabbed;
         public static event System.Action Thrown;
 
         private Rigidbody held;          // lo que llevamos (null = manos vacías)
@@ -124,6 +126,7 @@ namespace ShooterDem
             held = rb;
             heldUsedGravity = rb.useGravity;
             rb.useGravity = false;           // en la "mano" no pesa (el resorte lo sostiene)
+            Grabbed?.Invoke();               // sonido de agarre
         }
 
         void Drop()

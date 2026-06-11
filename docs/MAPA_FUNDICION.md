@@ -1,5 +1,8 @@
 # LA FUNDICIÓN — Documento de diseño del nivel
 
+> 🗺️ **Diagrama visual:** [`MAPA_FUNDICION_diagrama.svg`](MAPA_FUNDICION_diagrama.svg)
+> (corte vertical: 3 estratos + Atrio + recorrido A→F). Abrir en navegador.
+
 > Diseño congelado (jun 2026) con las decisiones del autor. Referencias: cutaway del
 > "refugio de ladrones" (estratos con profundidad) + automap de DOOM (zonas en loop).
 > Pilares: recorrido con principio y final · mapa interconectado (regla DOOM: ninguna

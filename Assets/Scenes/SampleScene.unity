@@ -2079,6 +2079,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4d62079a850b10143b34aa20800ab545, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ShooterDem.MusicManager
+  mapAudio: {fileID: 11400000, guid: 2bc1d9d8d1ccd8344be016fb49694804, type: 2}
   peaceClip: {fileID: 8300000, guid: cb4a4ecf25f9eab4b95c8b0a2d249e7d, type: 3}
   fightClip: {fileID: 8300000, guid: e79a0ba3a1486e44e943f4867d98abff, type: 3}
   stingerClip: {fileID: 0}
@@ -3302,6 +3303,19 @@ MonoBehaviour:
   heartbeatLoop: {fileID: 8300000, guid: 1a6bb6523c450a741b6d0563c3fac42f, type: 3}
   heartbeatThreshold: 0.3
   heartbeatVolume: 0.8
+  footstepClips:
+  - {fileID: 8300000, guid: eb4928c40dc61e04e9563d3bd780372f, type: 3}
+  - {fileID: 8300000, guid: 14b19083b7a696a44875e53a04ab3212, type: 3}
+  walkStepInterval: 0.5
+  sprintStepInterval: 0.35
+  crouchStepInterval: 0.75
+  footstepVolume: 0.6
+  crouchClips:
+  - {fileID: 8300000, guid: 522bb1c5e1627964e8d607546544f0dc, type: 3}
+  grabClips:
+  - {fileID: 8300000, guid: d7cb067bbb1fa77468dd7901ef0e1759, type: 3}
+  - {fileID: 8300000, guid: 883305d19f9a8b74191ead11cdf95ebc, type: 3}
+  throwClips: []
   volume: 1
 --- !u!114 &924380271
 MonoBehaviour:
@@ -3388,6 +3402,8 @@ MonoBehaviour:
   - {fileID: 1027628054}
   - {fileID: 1402096926}
   holsterTime: 0.4
+  switchClip: {fileID: 8300000, guid: 1ad5fd1e2e5bd2e4eb7ad5127056855b, type: 3}
+  switchVolume: 0.9
 --- !u!1 &927565392
 GameObject:
   m_ObjectHideFlags: 0
@@ -5412,6 +5428,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f20259fe4521a0f478f0e3c8f0efa117, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ShooterDem.PistolViewmodel
+  reloadClips:
+  - {fileID: 8300000, guid: 0033df24582f1bc4ab93450556e1bd35, type: 3}
+  - {fileID: 8300000, guid: 7838ca10da73621429d89f8982781011, type: 3}
+  - {fileID: 8300000, guid: 2cc83da109bfc3a42821e1b3a4cf8a32, type: 3}
+  reloadVolume: 1
 --- !u!95 &1402096929
 Animator:
   serializedVersion: 7

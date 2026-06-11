@@ -13,17 +13,31 @@ namespace ShooterDem
     [RequireComponent(typeof(Animator))]
     public class PistolViewmodel : MonoBehaviour
     {
+        [Tooltip("Sonidos de recarga (2D). Varias variantes = se elige una al azar.")]
+        public AudioClip[] reloadClips;
+        [Range(0f, 1f)] public float reloadVolume = 1f;
+
         private Animator animator;
+        private AudioSource audioSource;
         private static readonly int ReloadHash = Animator.StringToHash("Reload");
 
-        void Awake() { animator = GetComponent<Animator>(); }
+        void Awake()
+        {
+            animator = GetComponent<Animator>();
+            audioSource = gameObject.AddComponent<AudioSource>();
+            audioSource.playOnAwake = false;
+            audioSource.spatialBlend = 0f;   // 2D: el arma está "en mano"
+        }
 
         void Update()
         {
             if (Time.timeScale <= 0f) return;
             var kb = Keyboard.current;
             if (kb != null && kb.rKey.wasPressedThisFrame)
+            {
                 animator.SetTrigger(ReloadHash);
+                AudioUtil.PlayRandom(audioSource, reloadClips, reloadVolume);
+            }
         }
     }
 }

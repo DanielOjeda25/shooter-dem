@@ -344,8 +344,9 @@ namespace InfimaGames.LowPolyShooterPack
             //Get the equipped weapon!
             equippedWeapon = playerCharacter.GetInventory().GetEquipped();
 
-            //Play Sounds!
-            PlayFootstepSounds();
+            //Pasos (ASHFALL): los maneja PlayerAudio con clips discretos (step1/step2) al
+            //ritmo del estado; el loop del pack quedaba crudo. Se desactiva aqui.
+            //PlayFootstepSounds();
 
             //Salto (ASHFALL): detectar el press aqui; se aplica en FixedUpdate.
             if (jumpAction != null && jumpAction.WasPressedThisFrame())

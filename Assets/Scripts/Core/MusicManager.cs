@@ -16,7 +16,12 @@ namespace ShooterDem
     /// </summary>
     public class MusicManager : MonoBehaviour
     {
-        [Header("Pistas (loops, misma tonalidad para que el crossfade empalme)")]
+        [Header("Audio del MAPA (recomendado: 1 asset por mapa)")]
+        [Tooltip("Si se asigna, manda sobre los clips sueltos de abajo. Es la forma de " +
+                 "configurar la música por mapa desde el Inspector (Shooter > Map Audio).")]
+        public MapAudio mapAudio;
+
+        [Header("Pistas sueltas (fallback si NO hay MapAudio)")]
         public AudioClip peaceClip;     // exploración / arena limpia
         public AudioClip fightClip;     // combate / horda activa
         public AudioClip stingerClip;   // opcional: golpe de transición al entrar en combate
@@ -27,18 +32,32 @@ namespace ShooterDem
         public float calmDelay = 3f;                        // segundos sin enemigos antes de volver a peace
         [Range(0f, 1f)] public float stingerVolume = 0.9f;
 
-        private AudioSource peaceSource, fightSource, stingerSource;
+        private AudioSource peaceSource, fightSource, stingerSource, ambientSource;
+        private AudioClip resolvedStinger;   // del MapAudio o del clip suelto
+        private float ambientVolume;         // techo del ambiente (lo fija el MapAudio)
         private int alive;            // enemigos vivos (contados por el bus de EnemyHealth)
         private float calmTimer;      // cuenta atrás para volver a peace
         private bool combat;          // estado actual de la música
 
         void Awake()
         {
-            peaceSource = CreateLayer(peaceClip);
-            fightSource = CreateLayer(fightClip);
+            // El MapAudio (si está) manda; si no, los clips sueltos (retrocompatible).
+            AudioClip peace = mapAudio != null && mapAudio.peace != null ? mapAudio.peace : peaceClip;
+            AudioClip fight = mapAudio != null && mapAudio.fight != null ? mapAudio.fight : fightClip;
+            resolvedStinger = mapAudio != null && mapAudio.stinger != null ? mapAudio.stinger : stingerClip;
+
+            peaceSource = CreateLayer(peace);
+            fightSource = CreateLayer(fight);
             stingerSource = gameObject.AddComponent<AudioSource>();   // one-shots, sin loop
             stingerSource.playOnAwake = false;
             stingerSource.spatialBlend = 0f;
+
+            // Ambiente de fondo del mapa (viento/ceniza): loop continuo, AJENO al combate.
+            if (mapAudio != null && mapAudio.ambientLoop != null)
+            {
+                ambientVolume = mapAudio.ambientVolume;
+                ambientSource = CreateLayer(mapAudio.ambientLoop);
+            }
         }
 
         AudioSource CreateLayer(AudioClip clip)
@@ -79,6 +98,9 @@ namespace ShooterDem
             if (peaceSource.clip != null) peaceSource.Play();
             if (fightSource.clip != null) fightSource.Play();
             peaceSource.volume = musicVolume;   // empezamos en paz
+
+            // Ambiente: arranca a su volumen y se mantiene (no entra en el crossfade).
+            if (ambientSource != null) { ambientSource.volume = ambientVolume; ambientSource.Play(); }
         }
 
         void OnEnemySpawned(EnemyHealth e) => alive++;
@@ -105,13 +127,18 @@ namespace ShooterDem
             if (gameOver) { peaceTarget = 0f; fightTarget = 0f; }   // fin de partida: silencio
             peaceSource.volume = Mathf.MoveTowards(peaceSource.volume, peaceTarget, k * musicVolume);
             fightSource.volume = Mathf.MoveTowards(fightSource.volume, fightTarget, k * musicVolume);
+
+            // El ambiente solo se calla al terminar la partida (si no, suena siempre).
+            if (ambientSource != null)
+                ambientSource.volume = Mathf.MoveTowards(ambientSource.volume,
+                    gameOver ? 0f : ambientVolume, k * Mathf.Max(ambientVolume, 0.01f));
         }
 
         void EnterCombat()
         {
             combat = true;
             // El stinger suena ENCIMA del crossfade y disimula la costura (truco SS).
-            if (stingerClip != null) stingerSource.PlayOneShot(stingerClip, stingerVolume);
+            if (resolvedStinger != null) stingerSource.PlayOneShot(resolvedStinger, stingerVolume);
         }
     }
 }

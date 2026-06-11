@@ -28,6 +28,18 @@ namespace ShooterDem
         [Range(0f, 1f)] public float heartbeatThreshold = 0.3f;   // % de vida que lo activa
         [Range(0f, 1f)] public float heartbeatVolume = 0.8f;
 
+        [Header("Pasos (discretos, reemplazan el loop del pack)")]
+        public AudioClip[] footstepClips;          // step1, step2... se alternan al azar
+        public float walkStepInterval = 0.5f;      // seg entre pasos andando
+        public float sprintStepInterval = 0.35f;   // mas rapido esprintando
+        public float crouchStepInterval = 0.75f;   // mas lento agachado
+        [Range(0f, 1f)] public float footstepVolume = 0.6f;
+
+        [Header("Acciones")]
+        public AudioClip[] crouchClips;   // al agacharse (Ctrl)
+        public AudioClip[] grabClips;     // al agarrar un objeto (E)
+        public AudioClip[] throwClips;    // al arrojarlo (click)
+
         [Range(0f, 1f)] public float volume = 1f;
 
         // Anti-eco del quejido: con 2+ enemigos golpeando casi a la vez, cada golpe
@@ -40,11 +52,15 @@ namespace ShooterDem
         private AudioSource heartbeatSource;   // fuente propia: es un LOOP, no puede compartir
         private PlayerHealth health;
         private Movement movement;   // player del pack (puede no estar -> null-safe)
+        private Rigidbody body;      // para la velocidad horizontal (pasos)
+        private float stepTimer;
+        private bool wasCrouching;
 
         void Awake()
         {
             health = GetComponent<PlayerHealth>();
             movement = GetComponent<Movement>();
+            body = GetComponent<Rigidbody>();
             // SIEMPRE fuente propia (no GetComponent): el AudioSource que ya vive en el
             // player es el de los PASOS del pack, y Movement lo PAUSA con timeScale 0
             // (pausa/game over). Compartirlo silenciaba el grito de muerte: el Lose()
@@ -77,6 +93,8 @@ namespace ShooterDem
             LandingBob.Landed += OnLand;   // bus estatico (la camara detecta el aterrizaje)
             // Trepar un borde = esfuerzo similar al salto -> reusa los grunidos de salto.
             LedgeClimb.ClimbStarted += OnJump;
+            PhysicsCarry.Grabbed += OnGrab;
+            PhysicsCarry.Thrown += OnThrow;
         }
 
         void OnDisable()
@@ -94,7 +112,37 @@ namespace ShooterDem
             }
             LandingBob.Landed -= OnLand;
             LedgeClimb.ClimbStarted -= OnJump;
+            PhysicsCarry.Grabbed -= OnGrab;
+            PhysicsCarry.Thrown -= OnThrow;
             if (heartbeatSource != null) heartbeatSource.Stop();
+        }
+
+        // Pasos discretos (reemplazan el loop del pack) + sonido de agacharse.
+        void Update()
+        {
+            if (Time.timeScale <= 0f || movement == null) return;
+
+            // Crouch: un roce al ENTRAR en agachado (Ctrl).
+            bool crouching = movement.IsCrouching;
+            if (crouching && !wasCrouching) PlayRandom(crouchClips);
+            wasCrouching = crouching;
+
+            // Pasos: solo en suelo y moviéndose en horizontal; cadencia segun el estado.
+            if (footstepClips == null || footstepClips.Length == 0) return;
+            Vector3 hv = body != null ? body.linearVelocity : Vector3.zero; hv.y = 0f;
+            if (!movement.Grounded || hv.sqrMagnitude < 0.5f)
+            {
+                stepTimer = 0f;   // al frenar/saltar: el proximo primer paso suena enseguida
+                return;
+            }
+            stepTimer -= Time.deltaTime;
+            if (stepTimer <= 0f)
+            {
+                stepTimer = crouching ? crouchStepInterval
+                          : movement.SprintingEffective ? sprintStepInterval
+                          : walkStepInterval;
+                AudioUtil.PlayRandom(source, footstepClips, footstepVolume);
+            }
         }
 
         // Quejido SOLO en golpe no letal (en el letal suena el grito de muerte),
@@ -143,6 +191,8 @@ namespace ShooterDem
         void OnJump() => PlayRandom(jumpClips);
         void OnDash() => PlayRandom(dashClips);
         void OnNoStamina() => PlayRandom(noStaminaClips);
+        void OnGrab() => PlayRandom(grabClips);
+        void OnThrow() => PlayRandom(throwClips);
 
         void PlayRandom(AudioClip[] clips) => AudioUtil.PlayRandom(source, clips, volume);
     }

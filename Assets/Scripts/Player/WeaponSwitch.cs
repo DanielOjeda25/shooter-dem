@@ -19,13 +19,21 @@ namespace ShooterDem
         [Tooltip("Cuánto dura la animación de guardar (s) antes de ocultar el viewmodel.")]
         public float holsterTime = 0.4f;
 
+        [Tooltip("Sonido 2D al cambiar de arma (changeGun).")]
+        public AudioClip switchClip;
+        [Range(0f, 1f)] public float switchVolume = 0.9f;
+
         private int current;
         private bool switching;
+        private AudioSource audioSource;   // fuente 2D propia (feedback de interfaz)
 
         private static readonly int HolsterHash = Animator.StringToHash("Holster");
 
         void Start()
         {
+            audioSource = gameObject.AddComponent<AudioSource>();
+            audioSource.playOnAwake = false;
+            audioSource.spatialBlend = 0f;   // 2D
             for (int i = 0; i < slots.Length; i++)
                 if (slots[i] != null) slots[i].SetActive(i == current);
         }
@@ -61,6 +69,7 @@ namespace ShooterDem
         IEnumerator SwitchTo(int idx)
         {
             switching = true;
+            if (switchClip != null) audioSource.PlayOneShot(switchClip, switchVolume);
 
             // guardar el actual: si tiene anim de Holster, reproducir y esperar
             var cur = current >= 0 && current < slots.Length ? slots[current] : null;

@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 542ba4e1ad956ad458b1b0d23d3aa7a8, type: 3}
+  m_Name: Map_Ambience1
+  m_EditorClassIdentifier: Assembly-CSharp::ShooterDem.MapAudio
+  peace: {fileID: 8300000, guid: cb4a4ecf25f9eab4b95c8b0a2d249e7d, type: 3}
+  fight: {fileID: 8300000, guid: e79a0ba3a1486e44e943f4867d98abff, type: 3}
+  stinger: {fileID: 0}
+  ambientLoop: {fileID: 0}
+  ambientVolume: 0.5
