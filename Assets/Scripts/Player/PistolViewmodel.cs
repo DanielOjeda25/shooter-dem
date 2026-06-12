@@ -20,6 +20,7 @@ namespace ShooterDem
         private Animator animator;
         private AudioSource audioSource;
         private static readonly int ReloadHash = Animator.StringToHash("Reload");
+        private static readonly int InspectHash = Animator.StringToHash("Inspect");
 
         void Awake()
         {
@@ -38,6 +39,10 @@ namespace ShooterDem
                 animator.SetTrigger(ReloadHash);
                 AudioUtil.PlayRandom(audioSource, reloadClips, reloadVolume);
             }
+
+            // T = inspeccionar el arma (flourish; el clip deja las partes quietas/cargadas).
+            if (kb != null && kb.tKey.wasPressedThisFrame)
+                animator.SetTrigger(InspectHash);
         }
     }
 }
